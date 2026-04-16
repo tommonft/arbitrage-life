@@ -1,0 +1,40 @@
+name: Arbitrage Life — Deal Scanner
+
+on:
+  schedule:
+    # Runs every 2 hours (UTC) — adjust as needed
+    # 06:00, 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00 UTC
+    # = 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00, 22:00 CEST
+    - cron: '0 */2 * * *'
+  workflow_dispatch:  # allows manual run from GitHub UI anytime
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to commit seen_deals.json back
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run deal scanner
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python3 arbitrage_scanner.py
+
+      - name: Save seen deals (deduplicate next run)
+        run: |
+          git config user.name "Arbitrage Bot"
+          git config user.email "bot@arbitrage-life"
+          git add seen_deals.json || true
+          git diff --staged --quiet || git commit -m "chore: update seen deals [skip ci]"
+          git push || true
