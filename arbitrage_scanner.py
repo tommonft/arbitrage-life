@@ -48,11 +48,17 @@ PRG_VIE_KEYWORDS = [
     "central europe", "eastern europe",
 ]
 
-# ── Tom's Big 3 Airlines — AF / KLM / Delta ──────────────────────────────────
-BIG3_AIRLINES = [
-    "air france", "airfrance", "af ", " af ",
+# ── AF / KLM — globálně relevantní (Flying Blue Platinum) ────────────────────
+AF_KLM_KEYWORDS = [
+    "air france", "airfrance",
     "klm", "k.l.m",
-    "delta", "delta airlines", "dl ",
+    "flying blue",
+]
+
+# ── Delta — POUZE z PRG/VIE/BUD, jinak ignorovat ─────────────────────────────
+# Tom nežije v USA — Delta dealy z ATL/JFK/LAX jsou irelevantní
+DELTA_KEYWORDS = [
+    "delta", "delta airlines", "delta air lines",
 ]
 
 # ── SkyTeam carriers — Tom's primary alliance ────────────────────────────────
@@ -221,13 +227,23 @@ def score_deal(title, text=""):
         score += 2
         tags.append("CentralEU")
 
-    # ✈️ Big 3 airlines — AF / KLM / Delta (word boundary safe)
-    big3_hit = word_match(combined, BIG3_AIRLINES)
-    if big3_hit:
+    # ✈️ AF / KLM — vždy relevantní (Flying Blue Platinum)
+    afklm_hit = word_match(combined, AF_KLM_KEYWORDS)
+    if afklm_hit:
         score += 4
-        tags.append("AF/KLM/DL")
+        tags.append("AF/KLM")
 
-    # 🔥 JACKPOT: Big 3 + home airport = instant HOT
+    # ✈️ Delta — POUZE pokud je zmíněno PRG/VIE/BUD (jinak ignorovat)
+    delta_hit = word_match(combined, DELTA_KEYWORDS)
+    delta_relevant = delta_hit and home_hit  # Delta bez domácího letiště = skip
+
+    # Zpětná kompatibilita pro JACKPOT logiku
+    big3_hit = afklm_hit or delta_relevant
+    if delta_relevant and not afklm_hit:
+        score += 4
+        tags.append("Delta+PRG")
+
+    # 🚨 JACKPOT: AF/KLM/Delta + home airport = nejvyšší priorita
     if home_hit and big3_hit:
         score += 5
         tags.append("🎯JACKPOT")
@@ -405,7 +421,8 @@ def tag_emoji(tags):
         "🎯JACKPOT":    "🚨🎯",
         "PRG/VIE/BUD":  "🇨🇿",
         "CentralEU":    "🌍",
-        "AF/KLM/DL":    "✈️",
+        "AF/KLM":       "✈️",
+        "Delta+PRG":    "🔺✈️",
         "SkyTeam":      "🔵",
         "MistakeFare":  "💥",
         "BizClass":     "💺",
