@@ -387,6 +387,72 @@ def save_seen(seen_set):
     with open(SEEN_FILE, "w") as f:
         json.dump(list(seen_set)[-600:], f)
 
+# ── Save latest deals to JSON for the static HTML to read ────────────────────
+# (Phase 1 architecture: scanner → JSON → GitHub Pages → HTML on mobile.
+#  No Flask needed for viewing. Accumulates across runs, keeps newest 500.)
+LATEST_FILE = SCRIPT_DIR / "latest_deals.json"
+
+def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned):
+    """Save scored deals so HTML (locally or on GitHub Pages) can read them."""
+    existing = []
+    if LATEST_FILE.exists():
+        try:
+            with open(LATEST_FILE) as f:
+                existing = json.load(f)
+        except Exception:
+            existing = []
+
+    now_iso = datetime.now().isoformat()
+
+    def to_dict(score, d, tags):
+        title = d.get("title", "") or ""
+        text  = d.get("text", "") or ""
+        is_hotel = any(t.upper() in ("HOTEL",) for t in tags) or \
+                   any(k in title.lower() for k in ("hotel", "resort", "stay", "/night"))
+        # Try to pull a price from the title — best-effort, no fakes.
+        price = 0
+        currency = ""
+        m = re.search(r"(€|\$|EUR|USD|CZK)\s*([0-9][0-9,]{0,7})", title)
+        if m:
+            currency = m.group(1).replace("EUR", "€").replace("USD", "$")
+            try: price = int(m.group(2).replace(",", ""))
+            except Exception: price = 0
+        return {
+            "id":       d.get("id", ""),
+            "route":    title[:160],
+            "type":     "hotel" if is_hotel else "flight",
+            "url":      d.get("url", ""),
+            "source":   d.get("source", ""),
+            "score":    int(score),
+            "tags":     tags,
+            "price":    price,
+            "currency": currency,
+            "savings":  0,        # not parsed from scanner; HTML shows 0%
+            "airline":  "",       # unknown from scanner text
+            "dates":    "",       # unknown from scanner text
+            "grey_zone": ("GreyZone" in tags or "FuelDump" in tags),
+            "approved": False,
+            "created_at": now_iso,
+            "text":     text[:200],
+        }
+
+    new_items = [to_dict(s, d, t) for (s, d, t) in (hot_deals + warm_deals + grey_deals)]
+
+    # Merge with existing — newest wins on duplicates, keep top 500 newest.
+    by_id = {x.get("id"): x for x in existing}
+    for x in new_items:
+        by_id[x["id"]] = x
+    combined = sorted(
+        by_id.values(),
+        key=lambda x: x.get("created_at", ""),
+        reverse=True,
+    )[:500]
+
+    with open(LATEST_FILE, "w", encoding="utf-8") as f:
+        json.dump(combined, f, indent=2, ensure_ascii=False)
+
+    print(f"[✓] latest_deals.json saved — {len(combined)} deals, {len(new_items)} from this scan, {total_scanned} sources scanned")
+
 # ── Send Telegram ─────────────────────────────────────────────────────────────
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -534,6 +600,9 @@ def main():
     # Update seen IDs
     seen.update(d["id"] for d in new_deals)
     save_seen(seen)
+
+    # Phase 1: write the public JSON snapshot the static HTML reads on mobile.
+    save_latest_json(hot_deals, warm_deals, grey_deals, len(all_deals))
 
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Hotovo.")
 

@@ -31,10 +31,10 @@ jobs:
           CHAT_ID: ${{ secrets.CHAT_ID }}
         run: python3 arbitrage_scanner.py
 
-      - name: Save seen deals (deduplicate next run)
+      - name: Save seen deals + latest deals JSON (for HTML on GitHub Pages)
         run: |
           git config user.name "Arbitrage Bot"
           git config user.email "bot@arbitrage-life"
-          git add seen_deals.json || true
-          git diff --staged --quiet || git commit -m "chore: update seen deals [skip ci]"
+          git add seen_deals.json latest_deals.json || true
+          git diff --staged --quiet || git commit -m "chore: update deals snapshot [skip ci]"
           git push || true

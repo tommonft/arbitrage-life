@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- ╔═════ NO-CACHE ═════╗  prohlížeč nesmí ukládat tento soubor — kterákoli změna se musí načíst čerstvě. -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>🌍 Deal Hunter — Arbitrage Life</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        /* ──────────────────────────────────────────
+           FABLE-INSPIRED PALETTE (warm paper + accent red)
+           Class names preserved for JS compatibility.
+        ────────────────────────────────────────── */
+        :root {
+            --bg:     #FAF6EC;
+            --bg2:    #F2EBDA;
+            --card:   #FFFDF7;
+            --card2:  #F5EEDC;
+            --border: rgba(40, 28, 18, 0.10);
+            --border2:rgba(40, 28, 18, 0.18);
+            --text:   #1A1410;
+            --text1:  #1A1410;
+            --text2:  #756B5C;
+            --ink:    #2A1F18;
+            --accent: #C42818;          /* Fable red */
+            --accent2:#8C1810;
+            --fire:   #C42818;
+            --hot:    #C8741A;
+            --good:   #2E7D44;
+            --flight: #1F3A8A;          /* deep ink blue */
+            --hotel:  #6D3FA0;
+            --gold:   #B8841C;
+            --mono:   'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+            --display:'Anton', 'Bebas Neue', Impact, sans-serif;
+            --sans:   'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            background-image:
+              radial-gradient(rgba(40,28,18,0.025) 1px, transparent 1px),
+              radial-gradient(rgba(40,28,18,0.018) 1px, transparent 1px);
+            background-size: 24px 24px, 8px 8px;
+            background-position: 0 0, 12px 12px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-weight: 500;
+            min-height: 100vh;
+            max-width: 800px;
+            margin: 0 auto;
+            overscroll-behavior: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── MISPRICE BANNER ── */
+        #mispriceAlert {
+            display: none;
+            background: var(--accent);
+            color: #FFF8E8;
+            padding: 11px 16px;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            border-bottom: 2px solid var(--accent2);
+        }
+        #mispriceAlert.show { display: flex; animation: flashIn 0.4s ease; }
+        @keyframes flashIn { from { opacity: 0; transform: translateY(-100%); } to { opacity: 1; transform: none; } }
+        .alert-icon { font-size: 22px; }
+        .alert-text { flex: 1; }
+        .alert-title {
+            font-family: var(--display);
+            font-weight: 400;
+            font-size: 16px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+        .alert-sub   { font-size: 11px; opacity: 0.92; margin-top: 1px; font-family: var(--mono); }
+        .alert-count {
+            background: rgba(255,248,232,0.22);
+            border: 1px solid rgba(255,248,232,0.4);
+            border-radius: 4px;
+            padding: 3px 10px;
+            font-weight: 800;
+            font-size: 15px;
+            font-family: var(--mono);
+        }
+
+        /* ── LOADING BAR ── */
+        #loadingBar {
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--gold), var(--accent));
+            background-size: 200% 100%;
+            animation: shimmer 1.2s linear infinite;
+            display: none;
+        }
+        #loadingBar.show { display: block; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* ── HEADER ── */
+        .header {
+            padding: 16px 16px 12px;
+            background: rgba(250, 246, 236, 0.96);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border2);
+            backdrop-filter: blur(20px);
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .logo {
+            font-family: var(--display);
+            font-size: 26px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: var(--ink);
+            text-transform: uppercase;
+            line-height: 1;
+        }
+        .logo span {
+            display: block;
+            font-family: var(--mono);
+            font-weight: 500;
+            font-size: 10px;
+            color: var(--text2);
+            letter-spacing: 2px;
+            margin-top: 3px;
+            text-transform: uppercase;
+        }
+        .hdr-btns { display: flex; gap: 6px; }
+        .icon-btn {
+            width: 38px; height: 38px;
+            border-radius: 4px;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            color: var(--ink);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 15px;
+            transition: all 0.15s;
+        }
+        .icon-btn:active { transform: scale(0.92); background: var(--card2); }
+        .icon-btn:hover { background: var(--card2); }
+
+        /* ── SEARCH ── */
+        .search-row { display: flex; gap: 6px; }
+        .search-input {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 11px 14px;
+            color: var(--ink);
+            font-size: 14px;
+            font-family: var(--mono);
+            font-weight: 500;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: var(--accent); }
+        .search-input::placeholder { color: var(--text2); font-family: var(--sans); font-weight: 500; }
+        .search-btn {
+            background: var(--ink);
+            border: 1px solid var(--ink);
+            border-radius: 4px;
+            padding: 10px 18px;
+            color: #FAF6EC;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: all 0.15s;
+        }
+        .search-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .search-btn:active { opacity: 0.85; }
+
+        /* ── TABS ── */
+        .tabs {
+            display: flex;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border2);
+            padding: 0 8px;
+            gap: 0;
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab {
+            padding: 13px 12px 11px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text2);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+        .tab:hover { color: var(--ink); }
+        .tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+        .tab.tab-bonus { color: var(--gold); }
+        .tab.tab-bonus.active { border-bottom-color: var(--gold); color: var(--gold); }
+        .tab.tab-prg { color: var(--accent); }
+        .tab.tab-prg.active { border-bottom-color: var(--accent); color: var(--accent2); }
+
+        /* ── FILTER PILLS ── */
+        .pills {
+            display: flex;
+            gap: 6px;
+            padding: 10px 14px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+        }
+        .pills::-webkit-scrollbar { display: none; }
+        .pill {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--ink);
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+            letter-spacing: 0.3px;
+        }
+        .pill:hover { background: var(--card2); }
+        .pill.active {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #FAF6EC;
+        }
+        .pill.pill-accent.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #FAF6EC;
+        }
+
+        /* ── STATS BAR ── */
+        .stats {
+            display: flex;
+            gap: 18px;
+            padding: 8px 16px;
+            font-size: 10px;
+            font-family: var(--mono);
+            font-weight: 500;
+            color: var(--text2);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .stat-val { color: var(--ink); font-weight: 700; }
+
+        /* ── DEALS GRID ── */
+        .section-hdr {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 16px 10px;
+        }
+        .section-title {
+            font-family: var(--display);
+            font-size: 22px;
+            font-weight: 400;
+            color: var(--ink);
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            line-height: 1;
+        }
+        .section-count {
+            font-family: var(--mono);
+            font-size: 10px;
+            color: var(--text2);
+            letter-spacing: 1px;
+        }
+
+        .deals-grid {
+            padding: 0 12px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        @media (min-width: 560px) {
+            .deals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        }
+
+        /* ── DEAL CARD ── */
+        .deal-card {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 14px 14px 12px 17px;
+            cursor: pointer;
+            position: relative;
+            overflow: visible;
+            transition: transform 0.15s, border-color 0.2s, box-shadow 0.2s;
+        }
+        .deal-card:hover { border-color: var(--ink); box-shadow: 0 2px 0 rgba(40,28,18,0.06); }
+        .deal-card::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            border-radius: 6px 0 0 6px;
+        }
+        .deal-card.fire::before { background: var(--accent); }
+        .deal-card.hot::before  { background: var(--hot); }
+        .deal-card.good::before { background: var(--good); }
+        .deal-card:active { transform: scale(0.985); }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .card-left {}
+        .card-route {
+            font-family: var(--display);
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .card-meta {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--text2);
+            letter-spacing: 0.3px;
+        }
+        .card-right { text-align: right; }
+        .card-price {
+            font-family: var(--mono);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--ink);
+            line-height: 1;
+        }
+        .card-savings {
+            font-family: var(--mono);
+            font-size: 10.5px;
+            color: var(--good);
+            font-weight: 700;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .tag {
+            font-size: 9.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 3px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            font-family: var(--sans);
+        }
+        .tag-fire    { background: var(--accent); color: #FAF6EC; }
+        .tag-hot     { background: rgba(200,116,26,0.16); color: var(--hot); border:1px solid rgba(200,116,26,0.35); }
+        .tag-good    { background: rgba(46,125,68,0.14); color: var(--good); border:1px solid rgba(46,125,68,0.32); }
+        .tag-grey    { background: rgba(184,132,28,0.12); color: var(--gold); border:1px solid rgba(184,132,28,0.32); }
+        .tag-type    { background: rgba(31,58,138,0.10); color: var(--flight); border:1px solid rgba(31,58,138,0.25); }
+        .tag-hotel   { background: rgba(109,63,160,0.10); color: var(--hotel); border:1px solid rgba(109,63,160,0.28); }
+        .tag-new     { background: var(--card2); color: var(--text2); border:1px solid var(--border2); }
+
+        .grey-warning {
+            background: rgba(184,132,28,0.08);
+            border: 1px solid rgba(184,132,28,0.3);
+            border-radius: 4px;
+            padding: 7px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border2);
+        }
+        .card-source {
+            font-size: 10px;
+            color: var(--text2);
+            font-family: var(--mono);
+            letter-spacing: 0.3px;
+        }
+        .card-actions { display: flex; gap: 5px; align-items: center; }
+        .act-btn {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--ink);
+            transition: all 0.15s;
+            font-family: var(--sans);
+        }
+        .act-btn:hover { background: var(--card2); }
+        .act-btn:active { opacity: 0.7; }
+        .act-btn.send {
+            background: rgba(46,125,68,0.10);
+            border-color: rgba(46,125,68,0.35);
+            color: var(--good);
+        }
+        .act-btn.sent {
+            background: rgba(46,125,68,0.05);
+            border-color: rgba(46,125,68,0.2);
+            color: rgba(46,125,68,0.6);
+        }
+        .act-btn.archive-btn {
+            background: rgba(184,132,28,0.08);
+            border-color: rgba(184,132,28,0.3);
+            color: var(--gold);
+            font-size: 11px;
+            padding: 4px 7px;
+        }
+        .act-btn.delete-btn {
+            background: rgba(196,40,24,0.08);
+            border-color: rgba(196,40,24,0.3);
+            color: var(--accent);
+            font-size: 11px;
+            padding: 4px 7px;
+        }
+        .act-btn.more-btn {
+            background: var(--card2);
+            border-color: var(--border2);
+            color: var(--text2);
+            font-size: 14px;
+            padding: 3px 9px;
+            letter-spacing: 1px;
+            line-height: 1;
+        }
+        /* ── ACTION DROPDOWN ── */
+        .action-menu-wrap { position: relative; display: inline-block; }
+        .action-dropdown {
+            display: none;
+            position: absolute;
+            bottom: calc(100% + 6px);
+            right: 0;
+            background: var(--card);
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            min-width: 190px;
+            z-index: 500;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(40,28,18,0.18);
+        }
+        .action-dropdown.open { display: block; }
+        .ad-item {
+            padding: 10px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            transition: background 0.12s;
+            border-bottom: 1px solid var(--border);
+            color: var(--ink);
+        }
+        .ad-item:last-child { border-bottom: none; }
+        .ad-item:hover { background: var(--card2); }
+        .ad-item.shortlist { color: var(--gold); }
+        .ad-item.archive   { color: var(--hot); }
+        .ad-item.restore   { color: var(--good); }
+        .ad-item.delete    { color: var(--accent); }
+        .ad-item.original  { color: var(--flight); }
+
+        /* ── SHORTLIST BADGE ── */
+        .badge-shortlist {
+            background: rgba(184,132,28,0.10);
+            border: 1px solid rgba(184,132,28,0.45);
+            color: var(--gold);
+        }
+
+        /* ── SOURCE BADGES (flat, paper-friendly) ── */
+        .source-badge {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-left: 6px;
+            vertical-align: middle;
+            font-family: var(--sans);
+        }
+        .badge-secretflying {
+            background: rgba(196,40,24,0.08);
+            border: 1px solid rgba(196,40,24,0.35);
+            color: var(--accent2);
+        }
+        .badge-fly4free {
+            background: rgba(31,58,138,0.08);
+            border: 1px solid rgba(31,58,138,0.3);
+            color: var(--flight);
+        }
+        .badge-holidaypirates {
+            background: rgba(200,116,26,0.08);
+            border: 1px solid rgba(200,116,26,0.3);
+            color: var(--hot);
+        }
+        .badge-dansdeals {
+            background: rgba(109,63,160,0.08);
+            border: 1px solid rgba(109,63,160,0.3);
+            color: var(--hotel);
+        }
+        .badge-mirror {
+            background: rgba(46,125,68,0.08);
+            border: 1px solid rgba(46,125,68,0.3);
+            color: var(--good);
+        }
+        .badge-bonus {
+            background: rgba(184,132,28,0.12);
+            border: 1px solid rgba(184,132,28,0.5);
+            color: var(--gold);
+            font-weight: 900;
+        }
+        .deal-card.bonus-card {
+            border-color: rgba(184,132,28,0.4);
+            background: linear-gradient(to bottom, rgba(184,132,28,0.04), var(--card));
+        }
+        .deal-card.bonus-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 6px;
+            pointer-events: none;
+            box-shadow: inset 0 0 0 1px rgba(184,132,28,0.18);
+        }
+
+        /* ── ARCHIVED VIEW ── */
+        #archived-bar {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 16px;
+            background: rgba(184,132,28,0.08);
+            border-bottom: 1px solid rgba(184,132,28,0.3);
+            font-size: 12px; color: var(--gold);
+            font-weight: 700;
+        }
+
+        .score-pill {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 3px;
+            background: var(--card2);
+            color: var(--ink);
+            font-family: var(--mono);
+            border: 1px solid var(--border2);
+        }
+
+        /* ── HELP BUBBLE ── */
+        .help-btn {
+            position: fixed;
+            bottom: 84px;
+            right: 16px;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: var(--ink);
+            border: 1px solid var(--ink);
+            color: #FAF6EC;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 200;
+            box-shadow: 0 4px 12px rgba(40,28,18,0.25);
+        }
+        .help-panel {
+            display: none;
+            position: fixed;
+            bottom: 132px;
+            right: 12px;
+            width: min(340px, calc(100vw - 24px));
+            background: var(--card);
+            border: 1px solid var(--ink);
+            border-radius: 8px;
+            padding: 16px;
+            z-index: 201;
+            box-shadow: 0 12px 32px rgba(40,28,18,0.2);
+        }
+        .help-panel.open { display: block; }
+        .help-title {
+            font-family: var(--display);
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 1.2px;
+            margin-bottom: 12px;
+            color: var(--ink);
+            text-transform: uppercase;
+        }
+        .help-section { margin-bottom: 12px; }
+        .help-section-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        .help-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+        .help-chip {
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--card2);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 4px 10px;
+            cursor: pointer;
+            color: var(--ink);
+            transition: all 0.15s;
+        }
+        .help-chip:hover { background: var(--ink); color: #FAF6EC; border-color: var(--ink); }
+        .help-note {
+            font-size: 11px;
+            color: var(--text2);
+            line-height: 1.55;
+            margin-top: 10px;
+            border-top: 1px dashed var(--border2);
+            padding-top: 10px;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty {
+            text-align: center;
+            padding: 60px 24px;
+            display: none;
+        }
+        .empty-icon { font-size: 56px; margin-bottom: 14px; opacity: 0.6; }
+        .empty-title {
+            font-family: var(--display);
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 1.2px;
+            margin-bottom: 8px;
+            color: var(--ink);
+            text-transform: uppercase;
+        }
+        .empty-sub   { font-size: 13px; color: var(--text2); line-height: 1.55; }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 800px;
+            background: rgba(250,246,236,0.97);
+            border-top: 1px solid var(--ink);
+            backdrop-filter: blur(20px);
+            display: flex;
+            padding: 8px 10px;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            gap: 5px;
+            z-index: 150;
+        }
+        .nav-btn {
+            flex: 1;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 9px 4px 7px;
+            display: flex; flex-direction: column;
+            align-items: center; gap: 3px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .nav-btn:hover { background: var(--card2); }
+        .nav-btn:active { transform: scale(0.94); }
+        .nav-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #FAF6EC;
+            flex: 1.4;
+        }
+        .nav-btn.primary:hover { background: var(--accent2); border-color: var(--accent2); }
+        .nav-icon  { font-size: 16px; color: var(--ink); }
+        .nav-label {
+            font-size: 9px;
+            color: var(--text2);
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            font-family: var(--sans);
+        }
+        .nav-btn.primary .nav-icon { color: #FAF6EC; }
+        .nav-btn.primary .nav-label { color: rgba(250,246,236,0.9); }
+
+        .page-body { padding-bottom: 84px; }
+
+        /* ── FILTER SHEET ── */
+        .sheet-overlay {
+            position: fixed; inset: 0;
+            background: rgba(40,28,18,0.45);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            backdrop-filter: blur(6px);
+        }
+        .sheet-overlay.open { display: flex; }
+        .filter-sheet {
+            background: var(--bg);
+            border-top: 2px solid var(--ink);
+            border-radius: 16px 16px 0 0;
+            width: 100%;
+            max-height: 84vh;
+            overflow-y: auto;
+            padding: 14px 16px 40px;
+        }
+        .sheet-drag {
+            width: 42px; height: 4px;
+            background: var(--ink);
+            opacity: 0.25;
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+        .sheet-title {
+            font-family: var(--display);
+            font-size: 22px;
+            font-weight: 400;
+            letter-spacing: 1.4px;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+            color: var(--ink);
+        }
+
+        .f-group { margin-bottom: 20px; }
+        .f-label {
+            font-size: 10px; font-weight: 800;
+            color: var(--text2);
+            text-transform: uppercase; letter-spacing: 1.2px;
+            margin-bottom: 10px;
+        }
+        .f-options { display: flex; flex-wrap: wrap; gap: 6px; }
+        .f-opt {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--ink);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .f-opt:hover { background: var(--card2); }
+        .f-opt.sel {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #FAF6EC;
+        }
+
+        .range-wrap { padding: 0 2px; }
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+            height: 4px;
+            margin: 6px 0;
+        }
+        .range-vals {
+            display: flex; justify-content: space-between;
+            font-size: 11px; color: var(--text2);
+            font-family: var(--mono);
+            margin-top: 3px;
+        }
+        .range-cur { color: var(--ink); font-weight: 700; }
+
+        .toggle-row {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border2);
+        }
+        .toggle-row:last-child { border-bottom: none; }
+        .tgl-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+        .tgl-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+        .sw { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+        .sw input { opacity: 0; width: 0; height: 0; }
+        .sw-track {
+            position: absolute; inset: 0;
+            background: var(--card2);
+            border: 1px solid var(--border2);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+        .sw-track::before {
+            content: '';
+            position: absolute;
+            left: 2px; top: 2px;
+            width: 20px; height: 20px;
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 50%;
+            transition: 0.25s;
+        }
+        .sw input:checked + .sw-track { background: var(--accent); border-color: var(--accent); }
+        .sw input:checked + .sw-track::before { transform: translateX(18px); border-color: var(--accent2); }
+
+        .apply-btn {
+            width: 100%;
+            background: var(--ink);
+            color: #FAF6EC;
+            border: none;
+            border-radius: 4px;
+            padding: 14px;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.15s;
+            font-family: var(--sans);
+        }
+        .apply-btn:hover { background: var(--accent); }
+        .apply-btn:active { opacity: 0.9; }
+
+        /* ── SETTINGS ── */
+        .settings-panel {
+            position: fixed; inset: 0;
+            background: var(--bg);
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .settings-panel.open { display: flex; }
+        .settings-hdr {
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid var(--border2);
+            position: sticky; top: 0;
+            background: var(--bg);
+            z-index: 5;
+        }
+        .back-btn {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 6px 14px;
+            color: var(--ink);
+            font-size: 12px; font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .back-btn:hover { background: var(--ink); color: #FAF6EC; }
+        .settings-body { padding: 16px; }
+        .sg {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .sg-title {
+            padding: 10px 14px;
+            font-size: 10px; font-weight: 800;
+            color: var(--text2); text-transform: uppercase; letter-spacing: 1.2px;
+            border-bottom: 1px solid var(--border2);
+            background: var(--card2);
+        }
+        .si { padding: 11px 14px; border-bottom: 1px dashed var(--border2); }
+        .si:last-child { border-bottom: none; }
+        .si-label { font-size: 11px; color: var(--text2); margin-bottom: 6px; font-weight: 600; }
+        .si-input {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 9px 12px;
+            color: var(--ink);
+            font-size: 13px;
+            outline: none;
+            font-family: var(--mono);
+        }
+        .si-input:focus { border-color: var(--accent); }
+        .status-line {
+            margin-top: 12px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text2);
+            font-family: var(--mono);
+            letter-spacing: 0.5px;
+        }
+        #backendDot { font-size: 14px; }
+
+        /* ── AIRPORT MULTI-SELECT CHECKBOX GRID ── */
+        .airport-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+            gap: 5px;
+        }
+        .apt-chip {
+            background: var(--card);
+            border: 1px solid var(--border2);
+            border-radius: 4px;
+            padding: 7px 4px;
+            font-size: 11px;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+            color: var(--ink);
+            font-family: var(--mono);
+            letter-spacing: 0.5px;
+            transition: all 0.12s;
+            user-select: none;
+        }
+        .apt-chip:hover { background: var(--card2); }
+        .apt-chip.sel {
+            background: var(--ink);
+            color: #FAF6EC;
+            border-color: var(--ink);
+        }
+    </style>
+</head>
+<body>
+
+<!-- MISPRICE ALERT BANNER -->
+<div id="mispriceAlert" onclick="scrollToTop()">
+    <div class="alert-icon">🔥</div>
+    <div class="alert-text">
+        <div class="alert-title">MISPRICE ALERT ACTIVE</div>
+        <div class="alert-sub" id="alertSub">Loading...</div>
+    </div>
+    <div class="alert-count" id="alertCount">0</div>
+</div>
+
+<!-- LOADING BAR -->
+<div id="loadingBar"></div>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-top">
+        <div class="logo">🌍 DEAL HUNTER <span>by Arbitrage Life</span></div>
+        <div class="hdr-btns">
+            <div class="icon-btn" onclick="refreshDeals()" title="Refresh">⟳</div>
+            <div class="icon-btn" onclick="toggleArchived()" id="archived-icon-btn" title="Odložené & Expirované">📁</div>
+            <div class="icon-btn" onclick="openSettings()">⚙️</div>
+        </div>
+    </div>
+    <div class="search-row">
+        <input type="text" class="search-input" id="searchInput"
+               placeholder="PRG, VIE, BUD · NYC · business class · misprice..."
+               onkeydown="if(event.key==='Enter')doSearch()">
+        <select id="searchDate"
+               style="background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:10px;color:var(--text1);padding:0 10px;font-size:13px;height:44px;cursor:pointer;appearance:none;-webkit-appearance:none;">
+            <option value="">📅 Měsíc</option>
+            <option value="2026-04">Duben 2026</option>
+            <option value="2026-05">Květen 2026</option>
+            <option value="2026-06">Červen 2026</option>
+            <option value="2026-07">Červenec 2026</option>
+            <option value="2026-08">Srpen 2026</option>
+            <option value="2026-09">Září 2026</option>
+            <option value="2026-10">Říjen 2026</option>
+            <option value="2026-11">Listopad 2026</option>
+            <option value="2026-12">Prosinec 2026</option>
+            <option value="2027-01">Leden 2027</option>
+            <option value="2027-02">Únor 2027</option>
+        </select>
+        <button class="search-btn" onclick="doSearch()">Search</button>
+        <button class="search-btn" onclick="clearSearch()" style="background:rgba(255,255,255,0.1);min-width:44px;" title="Clear">✕</button>
+    </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+    <div class="tab active" onclick="switchTab('all',this)">All Deals</div>
+    <div class="tab" onclick="switchTab('flights',this)">✈️ Flights</div>
+    <div class="tab" onclick="switchTab('hotels',this)">🏨 Hotels</div>
+    <div class="tab tab-prg" onclick="switchTab('prg',this)">🇨🇿 PRG</div>
+    <div class="tab" onclick="switchTab('fire',this)">🔥 Misprice</div>
+    <div class="tab tab-bonus" onclick="switchTab('bonus',this)">🏆 Bonus Flights</div>
+    <div class="tab" onclick="switchTab('shortlist',this)">📌 Shortlist</div>
+    <div class="tab" onclick="switchTab('grey',this)">⚠️ Grey Zone</div>
+</div>
+
+<!-- FILTER PILLS -->
+<div class="pills">
+    <div class="pill active" id="pill-home"    onclick="togglePill('home')">🎯 PRG/VIE/BUD</div>
+    <div class="pill pill-accent" id="pill-fire"    onclick="togglePill('fire')">🔥 Misprice</div>
+    <div class="pill"        id="pill-200"     onclick="togglePill('200')">💰 Under $200</div>
+    <div class="pill"        id="pill-grey"    onclick="togglePill('grey')">⚠️ Grey Zone</div>
+    <div class="pill"        id="pill-star8"   onclick="togglePill('star8')">⭐ 8+ Hotels</div>
+    <div class="pill"        id="pill-short"   onclick="togglePill('short')">⚡ ≤1000 km</div>
+    <div class="pill"        id="pill-medium"  onclick="togglePill('medium')">🌐 ≤3500 km</div>
+    <div class="pill"        id="pill-longhaul"onclick="togglePill('longhaul')">🌏 >3500 km</div>
+    <div class="pill"        onclick="openFilterSheet()">≡ More filters</div>
+</div>
+
+<!-- HELP BUTTON + PANEL -->
+<button class="help-btn" onclick="toggleHelp()" title="Jak hledat?">?</button>
+<div class="help-panel" id="helpPanel">
+    <div class="help-title">🔍 Jak hledat</div>
+
+    <div class="help-section">
+        <div class="help-section-label">✈️ Letiště (klikni pro vyhledání)</div>
+        <div class="help-chips">
+            <span class="help-chip" onclick="quickSearch('PRG')">PRG – Praha</span>
+            <span class="help-chip" onclick="quickSearch('VIE')">VIE – Vídeň</span>
+            <span class="help-chip" onclick="quickSearch('BUD')">BUD – Budapešť</span>
+            <span class="help-chip" onclick="quickSearch('NYC')">NYC – New York</span>
+            <span class="help-chip" onclick="quickSearch('LAX')">LAX – Los Angeles</span>
+            <span class="help-chip" onclick="quickSearch('DXB')">DXB – Dubaj</span>
+            <span class="help-chip" onclick="quickSearch('BKK')">BKK – Bangkok</span>
+            <span class="help-chip" onclick="quickSearch('NRT')">NRT – Tokio</span>
+            <span class="help-chip" onclick="quickSearch('SIN')">SIN – Singapur</span>
+            <span class="help-chip" onclick="quickSearch('CDG')">CDG – Paříž</span>
+            <span class="help-chip" onclick="quickSearch('LHR')">LHR – Londýn</span>
+            <span class="help-chip" onclick="quickSearch('FCO')">FCO – Řím</span>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <div class="help-section-label">🔥 Typ dealu</div>
+        <div class="help-chips">
+            <span class="help-chip" onclick="quickSearch('misprice')">misprice</span>
+            <span class="help-chip" onclick="quickSearch('business')">business class</span>
+            <span class="help-chip" onclick="quickSearch('error')">error fare</span>
+            <span class="help-chip" onclick="quickSearch('miles')">miles / body</span>
+            <span class="help-chip" onclick="quickSearch('award')">award</span>
+            <span class="help-chip" onclick="quickSearch('fuel dump')">fuel dump</span>
+        </div>
+    </div>
+
+    <div class="help-section">
+        <div class="help-section-label">✈️ Aerolinka</div>
+        <div class="help-chips">
+            <span class="help-chip" onclick="quickSearch('Ryanair')">Ryanair</span>
+            <span class="help-chip" onclick="quickSearch('Lufthansa')">Lufthansa</span>
+            <span class="help-chip" onclick="quickSearch('Emirates')">Emirates</span>
+            <span class="help-chip" onclick="quickSearch('Turkish')">Turkish</span>
+            <span class="help-chip" onclick="quickSearch('Qatar')">Qatar</span>
+            <span class="help-chip" onclick="quickSearch('Wizzair')">Wizz Air</span>
+        </div>
+    </div>
+
+    <div class="help-note">
+        💡 <strong>Tip:</strong> Hotely zatím nejsou — scanner hledá letecké dealy.<br>
+        🕐 Misprice alertů přibude za 2–3 týdny až databáze pozná průměrné ceny.<br>
+        📲 Telegram @EdgeIntelTury_bot posílá 🚨 alert při 30%+ pod průměrem.
+    </div>
+</div>
+
+<!-- ARCHIVED BAR (hidden by default) -->
+<div id="archived-bar" style="display:none">
+    📁 Zobrazuji Odložené & Expirované dealy
+    <button id="archived-btn" onclick="toggleArchived()"
+            style="margin-left:auto;background:rgba(255,170,0,0.15);border:1px solid rgba(255,170,0,0.4);color:#ffaa00;border-radius:8px;padding:3px 10px;font-size:11px;font-weight:700;cursor:pointer">
+        ← Zpět na aktivní
+    </button>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div>Deals: <span class="stat-val" id="statTotal">—</span></div>
+    <div>🔥 Hot: <span class="stat-val" id="statFire">—</span></div>
+    <div>Updated: <span class="stat-val" id="statTime">—</span></div>
+</div>
+
+<!-- PAGE BODY -->
+<div class="page-body">
+    <div class="section-hdr">
+        <div class="section-title" id="sectionTitle">Hot Deals</div>
+        <div class="section-count" id="sectionCount"></div>
+    </div>
+
+    <div class="deals-grid" id="dealsGrid"></div>
+
+    <div class="empty" id="emptyState">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No deals match your filters</div>
+        <div class="empty-sub">Try adjusting filters or open Settings<br>to connect your API keys for live scanning</div>
+    </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <div class="nav-btn" onclick="switchTab('flights',null)">
+        <div class="nav-icon">✈️</div><div class="nav-label">Flights</div>
+    </div>
+    <div class="nav-btn" onclick="switchTab('prg',null)">
+        <div class="nav-icon">🇨🇿</div><div class="nav-label">PRG</div>
+    </div>
+    <div class="nav-btn primary" onclick="openFilterSheet()">
+        <div class="nav-icon">🎯</div><div class="nav-label">Filters</div>
+    </div>
+    <div class="nav-btn" onclick="switchTab('hotels',null)">
+        <div class="nav-icon">🏨</div><div class="nav-label">Hotels</div>
+    </div>
+    <div class="nav-btn" onclick="switchTab('fire',null)">
+        <div class="nav-icon">🔥</div><div class="nav-label">Alerts</div>
+    </div>
+</div>
+
+<!-- FILTER SHEET -->
+<div class="sheet-overlay" id="filterSheet" onclick="if(event.target===this)closeSheet()">
+    <div class="filter-sheet">
+        <div class="sheet-drag"></div>
+        <div class="sheet-title">🎯 Filter Deals</div>
+
+        <div class="f-group">
+            <div class="f-label">✈️ Airport selector (multi-select)</div>
+            <div class="airport-grid" id="airportGrid">
+                <div class="apt-chip" data-apt="PRG" onclick="toggleAirportChip(this)">PRG</div>
+                <div class="apt-chip" data-apt="VIE" onclick="toggleAirportChip(this)">VIE</div>
+                <div class="apt-chip" data-apt="BUD" onclick="toggleAirportChip(this)">BUD</div>
+                <div class="apt-chip" data-apt="BRQ" onclick="toggleAirportChip(this)">BRQ</div>
+                <div class="apt-chip" data-apt="OSR" onclick="toggleAirportChip(this)">OSR</div>
+                <div class="apt-chip" data-apt="KSC" onclick="toggleAirportChip(this)">KSC</div>
+                <div class="apt-chip" data-apt="BTS" onclick="toggleAirportChip(this)">BTS</div>
+                <div class="apt-chip" data-apt="WAW" onclick="toggleAirportChip(this)">WAW</div>
+                <div class="apt-chip" data-apt="KRK" onclick="toggleAirportChip(this)">KRK</div>
+                <div class="apt-chip" data-apt="BER" onclick="toggleAirportChip(this)">BER</div>
+                <div class="apt-chip" data-apt="MUC" onclick="toggleAirportChip(this)">MUC</div>
+                <div class="apt-chip" data-apt="FRA" onclick="toggleAirportChip(this)">FRA</div>
+                <div class="apt-chip" data-apt="AMS" onclick="toggleAirportChip(this)">AMS</div>
+                <div class="apt-chip" data-apt="LHR" onclick="toggleAirportChip(this)">LHR</div>
+                <div class="apt-chip" data-apt="CDG" onclick="toggleAirportChip(this)">CDG</div>
+                <div class="apt-chip" data-apt="BCN" onclick="toggleAirportChip(this)">BCN</div>
+                <div class="apt-chip" data-apt="MAD" onclick="toggleAirportChip(this)">MAD</div>
+                <div class="apt-chip" data-apt="FCO" onclick="toggleAirportChip(this)">FCO</div>
+                <div class="apt-chip" data-apt="MXP" onclick="toggleAirportChip(this)">MXP</div>
+                <div class="apt-chip" data-apt="ZRH" onclick="toggleAirportChip(this)">ZRH</div>
+                <div class="apt-chip" data-apt="ATH" onclick="toggleAirportChip(this)">ATH</div>
+                <div class="apt-chip" data-apt="IST" onclick="toggleAirportChip(this)">IST</div>
+                <div class="apt-chip" data-apt="DXB" onclick="toggleAirportChip(this)">DXB</div>
+                <div class="apt-chip" data-apt="JFK" onclick="toggleAirportChip(this)">JFK</div>
+                <div class="apt-chip" data-apt="LAX" onclick="toggleAirportChip(this)">LAX</div>
+                <div class="apt-chip" data-apt="NRT" onclick="toggleAirportChip(this)">NRT</div>
+                <div class="apt-chip" data-apt="BKK" onclick="toggleAirportChip(this)">BKK</div>
+                <div class="apt-chip" data-apt="SIN" onclick="toggleAirportChip(this)">SIN</div>
+                <div class="apt-chip" data-apt="HKG" onclick="toggleAirportChip(this)">HKG</div>
+                <div class="apt-chip" data-apt="SYD" onclick="toggleAirportChip(this)">SYD</div>
+                <div class="apt-chip" data-apt="GRU" onclick="toggleAirportChip(this)">GRU</div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">📏 Flight distance (haversine, km)</div>
+            <div class="f-options" id="distanceOpts">
+                <div class="f-opt sel" data-dist="any"    onclick="solo(this,'distanceOpts')">Any</div>
+                <div class="f-opt"     data-dist="short"  onclick="solo(this,'distanceOpts')">⚡ ≤1000</div>
+                <div class="f-opt"     data-dist="medium" onclick="solo(this,'distanceOpts')">🌐 ≤3500</div>
+                <div class="f-opt"     data-dist="long"   onclick="solo(this,'distanceOpts')">🌏 >3500</div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">Max Price (per person / per night)</div>
+            <div class="range-wrap">
+                <input type="range" min="30" max="2000" value="500" id="priceRange"
+                       oninput="document.getElementById('priceRangeVal').textContent='$'+this.value">
+                <div class="range-vals">
+                    <span>$30</span>
+                    <span class="range-cur" id="priceRangeVal">$500</span>
+                    <span>$2000+</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">Hotel Star Rating (minimum)</div>
+            <div class="f-options" id="ratingOpts">
+                <div class="f-opt"     onclick="solo(this,'ratingOpts')">Any</div>
+                <div class="f-opt sel" onclick="solo(this,'ratingOpts')">⭐ 6+</div>
+                <div class="f-opt"     onclick="solo(this,'ratingOpts')">⭐ 7+</div>
+                <div class="f-opt"     onclick="solo(this,'ratingOpts')">⭐ 8+</div>
+                <div class="f-opt"     onclick="solo(this,'ratingOpts')">⭐ 9+</div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">Date Flexibility</div>
+            <div class="f-options" id="flexOpts">
+                <div class="f-opt sel" onclick="solo(this,'flexOpts')">Exact dates</div>
+                <div class="f-opt"     onclick="solo(this,'flexOpts')">± 1 day</div>
+                <div class="f-opt"     onclick="solo(this,'flexOpts')">± 3 days</div>
+                <div class="f-opt"     onclick="solo(this,'flexOpts')">± 7 days</div>
+                <div class="f-opt"     onclick="solo(this,'flexOpts')">Any date</div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">Hotel Distance from Center</div>
+            <div class="f-options" id="distOpts">
+                <div class="f-opt"     onclick="solo(this,'distOpts')">0.5 km</div>
+                <div class="f-opt sel" onclick="solo(this,'distOpts')">1 km</div>
+                <div class="f-opt"     onclick="solo(this,'distOpts')">2 km</div>
+                <div class="f-opt"     onclick="solo(this,'distOpts')">5 km</div>
+                <div class="f-opt"     onclick="solo(this,'distOpts')">Any</div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">✈️ Airline Alliance</div>
+            <div class="f-options" id="allianceOpts">
+                <div class="f-opt sel" onclick="solo(this,'allianceOpts')" data-alliance="all">🌍 All alliances</div>
+                <div class="f-opt"     onclick="solo(this,'allianceOpts')" data-alliance="skyteam">💙 SkyTeam<br><span style="font-size:10px;opacity:0.6">AF · KL · DL · OK</span></div>
+                <div class="f-opt"     onclick="solo(this,'allianceOpts')" data-alliance="star">⭐ Star Alliance<br><span style="font-size:10px;opacity:0.6">LH · UA · SQ · TK · OS</span></div>
+                <div class="f-opt"     onclick="solo(this,'allianceOpts')" data-alliance="oneworld">🔴 OneWorld<br><span style="font-size:10px;opacity:0.6">BA · QR · IB · CX · AY</span></div>
+                <div class="f-opt"     onclick="solo(this,'allianceOpts')" data-alliance="lcc">🟡 LCC only<br><span style="font-size:10px;opacity:0.6">FR · W6 · U2 · VY</span></div>
+                <div class="f-opt"     onclick="solo(this,'allianceOpts')" data-alliance="nolcc">🚫 No LCC<br><span style="font-size:10px;opacity:0.6">FSC airlines only</span></div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">🛩️ Specific Airlines (multiple OK)</div>
+            <div class="f-options" id="airlineOpts">
+                <div class="f-opt sel" onclick="toggle(this)" data-airline="any">Any airline</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="AF">Air France</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="KL">KLM</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="DL">Delta</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="EK">Emirates</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="TK">Turkish</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="QR">Qatar</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="LH">Lufthansa</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="FR">Ryanair</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="W6">Wizzair</div>
+                <div class="f-opt"     onclick="toggle(this)" data-airline="U2">EasyJet</div>
+            </div>
+        </div>
+
+        <div class="f-group">
+            <div class="f-label">Special Toggles</div>
+            <div class="toggle-row">
+                <div><div class="tgl-name">Grey Zone Deals</div>
+                <div class="tgl-desc">Fuel dump, hidden city — your risk</div></div>
+                <label class="sw"><input type="checkbox" id="swGrey">
+                <span class="sw-track"></span></label>
+            </div>
+            <div class="toggle-row">
+                <div><div class="tgl-name">Award Anomalies</div>
+                <div class="tgl-desc">Cash-beats-miles alerts via Seats.aero</div></div>
+                <label class="sw"><input type="checkbox" id="swAward" checked>
+                <span class="sw-track"></span></label>
+            </div>
+            <div class="toggle-row">
+                <div><div class="tgl-name">Misprice Only</div>
+                <div class="tgl-desc">Only confirmed pricing errors (35%+ below avg)</div></div>
+                <label class="sw"><input type="checkbox" id="swMisprice">
+                <span class="sw-track"></span></label>
+            </div>
+            <div class="toggle-row">
+                <div><div class="tgl-name">Flying Blue Only</div>
+                <div class="tgl-desc">AF/KLM ecosystem — safe for Platinum PFL</div></div>
+                <label class="sw"><input type="checkbox" id="swFB">
+                <span class="sw-track"></span></label>
+            </div>
+        </div>
+
+        <button class="apply-btn" onclick="applyFilters()">✅ Apply Filters</button>
+    </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+    <div class="settings-hdr">
+        <button class="back-btn" onclick="closeSettings()">← Back</button>
+        <div style="font-size:17px;font-weight:800">⚙️ Settings</div>
+    </div>
+    <div class="settings-body">
+
+        <div class="sg">
+            <div class="sg-title">🔑 API Keys</div>
+            <div class="si">
+                <div class="si-label">Kiwi Tequila API Key — free at tequila.kiwi.com</div>
+                <input class="si-input" type="password" id="cfgKiwi" placeholder="Get free key at tequila.kiwi.com">
+            </div>
+            <div class="si">
+                <div class="si-label">Telegram Bot Token (from @BotFather)</div>
+                <input class="si-input" type="password" id="cfgTgToken" placeholder="1234567890:AABBcc...">
+            </div>
+            <div class="si">
+                <div class="si-label">Telegram Chat ID</div>
+                <input class="si-input" id="cfgTgChat" placeholder="-100123456789">
+            </div>
+        </div>
+
+        <div class="sg">
+            <div class="sg-title">🎯 Home Airports</div>
+            <div class="si">
+                <div class="si-label">Comma separated IATA codes</div>
+                <input class="si-input" id="cfgAirports" value="PRG, VIE, BUD">
+            </div>
+        </div>
+
+        <div class="sg">
+            <div class="sg-title">🚨 Alert Thresholds</div>
+            <div class="si">
+                <div class="si-label">🔥 Misprice — % below 90-day average</div>
+                <input class="si-input" id="cfgMisprice" type="number" value="35">
+            </div>
+            <div class="si">
+                <div class="si-label">⚡ Hot deal — % below average</div>
+                <input class="si-input" id="cfgHot" type="number" value="20">
+            </div>
+            <div class="si">
+                <div class="si-label">Minimum score for Telegram alert</div>
+                <input class="si-input" id="cfgMinScore" type="number" value="8">
+            </div>
+        </div>
+
+        <div class="sg">
+            <div class="sg-title">⏱️ Scan Interval</div>
+            <div class="si">
+                <div class="f-options" id="intervalOpts">
+                    <div class="f-opt" onclick="solo(this,'intervalOpts')">30 min</div>
+                    <div class="f-opt sel" onclick="solo(this,'intervalOpts')">2 hours</div>
+                    <div class="f-opt" onclick="solo(this,'intervalOpts')">6 hours</div>
+                    <div class="f-opt" onclick="solo(this,'intervalOpts')">12 hours</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sg">
+            <div class="sg-title">ℹ️ Backend</div>
+            <div class="si">
+                <div class="si-label">Run in Terminal to start scanner:</div>
+                <div style="background:var(--bg2);border-radius:8px;padding:10px;font-family:monospace;font-size:11px;color:#7DFFB3;margin-top:6px;word-break:break-all">
+                    cd ~/Documents/Claude/Projects/Arbitrage-Life<br>
+                    pip3 install flask feedparser requests --break-system-packages<br>
+                    python3 deal_hunter.py
+                </div>
+            </div>
+        </div>
+
+        <button class="apply-btn" onclick="saveSettings()">💾 Save Settings</button>
+        <div class="status-line">
+            Backend: <span id="backendDot">⚪</span> <span id="backendStatus">Checking...</span>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let allDeals = [];
+let activeTab = 'all';
+let activePills = new Set(['home']);
+let greyZoneOn = false;
+let activeAirports = new Set();      // multi-select from filter sheet airport grid
+let activeDistance = 'any';          // 'any' | 'short' | 'medium' | 'long' from sheet distance opts
+
+// ─── IATA → [lat, lng] lookup (~140 destinations, enough for Haversine distance) ───
+const IATA_COORDS = {
+    // CZ + central/east EU hubs
+    PRG:[50.10,14.26], VIE:[48.11,16.57], BUD:[47.43,19.26], BRQ:[49.15,16.69],
+    OSR:[49.70,18.11], KSC:[48.66,21.24], BTS:[48.17,17.21], WAW:[52.17,20.97],
+    KRK:[50.08,19.78], WRO:[51.10,16.88], POZ:[52.42,16.83], VNO:[54.64,25.28],
+    // Germany/Austria/Switzerland
+    BER:[52.36,13.50], MUC:[48.35,11.79], FRA:[50.04,8.55], STR:[48.69,9.22],
+    DRS:[51.13,13.77], HAM:[53.63,9.99], ZRH:[47.46,8.55], GVA:[46.24,6.11],
+    // BeNeLux + UK/Ireland
+    AMS:[52.31,4.76], BRU:[50.90,4.48], LHR:[51.47,-0.45], LGW:[51.16,-0.18],
+    LON:[51.50,-0.12], EDI:[55.95,-3.37], DUB:[53.43,-6.25],
+    // France/Italy
+    CDG:[49.01,2.55], ORY:[48.72,2.38], NCE:[43.66,7.21], MRS:[43.44,5.21],
+    NTE:[47.16,-1.61], TLS:[43.63,1.36], LYS:[45.73,5.08],
+    FCO:[41.80,12.25], MXP:[45.63,8.72], MIL:[45.45,9.28], NAP:[40.88,14.29],
+    PMO:[38.18,13.10], CTA:[37.46,15.06], BLQ:[44.53,11.29], VRN:[45.40,10.89],
+    TRS:[45.83,13.47], PSA:[43.68,10.39], FLR:[43.81,11.20], CAG:[39.25,9.05],
+    AHO:[40.63,8.29], ROM:[41.90,12.50], RMI:[44.02,12.61],
+    // Iberia
+    BCN:[41.30,2.08], MAD:[40.49,-3.57], BIO:[43.30,-2.91], SVQ:[37.42,-5.89],
+    VLC:[39.49,-0.48], AGP:[36.67,-4.50], ALC:[38.28,-0.56], IBZ:[38.87,1.37],
+    PMI:[39.55,2.74], LPA:[27.93,-15.39], FUE:[28.45,-13.86], TFS:[28.04,-16.57],
+    LIS:[38.78,-9.13], OPO:[41.24,-8.68],
+    // Scandinavia/Baltic
+    OSL:[60.19,11.10], CPH:[55.62,12.65], ARN:[59.65,17.92], HEL:[60.32,24.95],
+    GOT:[57.66,12.27], BMA:[59.35,17.94], RIX:[56.92,23.97],
+    // Balkans/Greece/Turkey
+    ATH:[37.94,23.94], SKG:[40.52,22.97], JMK:[37.43,25.34], JTR:[36.40,25.48],
+    RHO:[36.40,28.09], JSI:[39.22,23.50], ZTH:[37.75,20.88], PVK:[38.92,20.77],
+    HER:[35.34,25.18], CFU:[39.60,19.91], ZAG:[45.74,16.07], DBV:[42.56,18.27],
+    SJJ:[43.82,18.33], TGD:[42.36,19.25], SOF:[42.69,23.41], VAR:[43.23,27.83],
+    BOJ:[42.57,27.51], BUH:[44.57,26.10], IAS:[47.18,27.62], OTP:[44.57,26.10],
+    SKP:[41.96,21.62], PRN:[42.57,21.04], INI:[43.34,21.85], TIA:[41.41,19.72],
+    IST:[41.28,28.74], SAW:[40.90,29.31], AYT:[36.90,30.79], ADB:[38.29,27.16],
+    MLA:[35.85,14.48], FNC:[32.69,-16.77],
+    // Middle East
+    DXB:[25.25,55.36], AUH:[24.43,54.65], DOH:[25.27,51.61], TLV:[32.01,34.89],
+    AMM:[31.72,35.99], RUH:[24.96,46.70], JED:[21.68,39.15], BEY:[33.82,35.49],
+    CAI:[30.11,31.41],
+    // North America
+    JFK:[40.64,-73.78], EWR:[40.69,-74.17], LGA:[40.78,-73.87], NYC:[40.71,-74.00],
+    LAX:[33.94,-118.40], SFO:[37.62,-122.38], MIA:[25.79,-80.29], ORD:[41.97,-87.90],
+    BOS:[42.36,-71.00], DFW:[32.90,-97.04], ATL:[33.64,-84.43], SEA:[47.45,-122.31],
+    IAD:[38.94,-77.46], DEN:[39.86,-104.67], YYZ:[43.68,-79.63], YVR:[49.19,-123.18],
+    YUL:[45.47,-73.74],
+    // LatAm + Caribbean
+    GRU:[-23.43,-46.47], GIG:[-22.81,-43.25], BHZ:[-19.84,-43.95], FOR:[-3.78,-38.53],
+    MEX:[19.44,-99.07], BOG:[4.70,-74.14], LIM:[-12.02,-77.11], EZE:[-34.82,-58.54],
+    SCL:[-33.39,-70.79], HAV:[22.99,-82.41], CUN:[21.04,-86.87],
+    // Africa
+    JNB:[-26.13,28.24], CPT:[-33.97,18.60], NBO:[-1.32,36.93], LOS:[6.58,3.32],
+    ALG:[36.69,3.22], TUN:[36.85,10.23], CMN:[33.37,-7.59], RAK:[31.61,-8.04],
+    // Asia/Pacific
+    NRT:[35.77,140.39], HND:[35.55,139.78], KIX:[34.43,135.24], ICN:[37.46,126.44],
+    TPE:[25.08,121.23], BKK:[13.69,100.75], DMK:[13.91,100.61], SIN:[1.36,103.99],
+    HKG:[22.31,113.92], KUL:[2.74,101.71], CGK:[-6.13,106.66], MNL:[14.51,121.02],
+    PVG:[31.14,121.81], PEK:[40.08,116.58], DEL:[28.57,77.10], BOM:[19.09,72.87],
+    CMB:[7.18,79.88], MLE:[4.19,73.53], SYD:[-33.94,151.18], MEL:[-37.67,144.84],
+    AKL:[-37.01,174.79]
+};
+
+function _haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371; // km
+    const toRad = d => d * Math.PI / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a = Math.sin(dLat/2)**2 +
+              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+    return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+// Returns distance in km between first two IATA-like 3-letter codes in d.route, or NaN.
+function flightDistanceKm(route) {
+    if (!route) return NaN;
+    const codes = (route.toUpperCase().match(/\b[A-Z]{3}\b/g) || [])
+                    .filter(c => IATA_COORDS[c]);
+    if (codes.length < 2) return NaN;
+    const [a, b] = [IATA_COORDS[codes[0]], IATA_COORDS[codes[1]]];
+    return _haversine(a[0], a[1], b[0], b[1]);
+}
+
+// Used by filterDeals — flight matches distance bucket [min, max).
+function distOK(d, min, max) {
+    if (d.type !== 'flight') return false;
+    const km = flightDistanceKm(d.route);
+    if (isNaN(km)) return false;
+    return km >= min && km < max;
+}
+
+// Resolve Flask URL whether opened at localhost:5555 OR via file:// in Safari/Chrome.
+const API = (window.location.protocol === 'http:' || window.location.protocol === 'https:')
+    ? ''                              // served by Flask → relative URLs
+    : 'http://localhost:5555';        // file:// → reach Flask explicitly
+
+// ═══════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+    loadSettings();
+    checkBackend();
+    loadDeals();
+
+    // Auto-refresh when returning to tab (after Telegram alert etc.)
+    let lastVisible = Date.now();
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            const away = Date.now() - lastVisible;
+            if (away > 60000 && !showingArchived) { // away > 1 min → refresh
+                loadDeals();
+            }
+        } else {
+            lastVisible = Date.now();
+        }
+    });
+});
+
+// ═══════════════════════════════════════════
+//  BACKEND
+// ═══════════════════════════════════════════
+async function checkBackend() {
+    try {
+        const r = await fetch(API + '/api/status', { signal: AbortSignal.timeout(3000) });
+        if (r.ok) {
+            document.getElementById('backendDot').textContent = '🟢';
+            document.getElementById('backendStatus').textContent = 'Connected — live scanning active';
+        }
+    } catch {
+        document.getElementById('backendDot').textContent = '🔴';
+        document.getElementById('backendStatus').textContent = 'Not running — showing demo data';
+    }
+}
+
+async function loadDeals() {
+    setLoading(true);
+    // Phase 1 architecture: try static JSON first (works on GitHub Pages, mobile, file://),
+    // then fall back to Flask /api/deals for local dev. Both return the same shape.
+    const SOURCES = [
+        './latest_deals.json',
+        API ? (API + '/api/deals') : '/api/deals'
+    ];
+    for (const src of SOURCES) {
+        try {
+            const r = await fetch(src, { signal: AbortSignal.timeout(8000) });
+            if (!r.ok) continue;
+            allDeals = await r.json();
+            render();
+            updateStats();
+            setLoading(false);
+            return;
+        } catch (e) { /* try next source */ }
+    }
+    // Both sources unreachable — show honest offline state. NO FAKE DATA.
+    allDeals = [];
+    render();
+    updateStats();
+    const empty = document.getElementById('emptyState');
+    const grid  = document.getElementById('dealsGrid');
+    if (grid) grid.innerHTML = '';
+    if (empty) {
+        empty.style.display = 'block';
+        empty.querySelector('.empty-title').textContent = 'No live data';
+        empty.querySelector('.empty-sub').innerHTML =
+            'Scanner hasn\'t pushed deals yet, or your connection is offline.<br>' +
+            'Try again in a moment, or check <a href="https://github.com/tommonft/arbitrage-life/actions" style="color:var(--flight)">GitHub Actions</a>.';
+    }
+    setLoading(false);
+}
+
+async function refreshDeals() {
+    setLoading(true);
+    await loadDeals();
+    setLoading(false);
+}
+
+function toggleHelp() {
+    document.getElementById('helpPanel').classList.toggle('open');
+}
+
+function quickSearch(term) {
+    document.getElementById('helpPanel').classList.remove('open');
+    document.getElementById('searchInput').value = term;
+    doSearch();
+}
+
+async function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchDate').value = '';
+    document.getElementById('sectionTitle').textContent = 'Live Deals';
+    await loadDeals();
+}
+
+async function doSearch() {
+    const q    = document.getElementById('searchInput').value.trim();
+    const date = document.getElementById('searchDate').value; // YYYY-MM
+    if (!q && !date) { await clearSearch(); return; }
+    setLoading(true);
+
+    let params = new URLSearchParams();
+    if (q)    params.set('q', q);
+    if (date) params.set('date', date);
+
+    try {
+        const r = await fetch(API + `/api/search?${params}`);
+        if (r.ok) {
+            const results = await r.json();
+            if (results.length === 0) {
+                setLoading(false);
+                const grid  = document.getElementById('dealsGrid');
+                const empty = document.getElementById('emptyState');
+                empty.style.display = 'block';
+                empty.querySelector('.empty-title').textContent =
+                    `Žádné dealy pro "${q || ''}${date ? ' · ' + date : ''}"`;
+                empty.querySelector('.empty-sub').textContent =
+                    'Zkus: PRG, VIE, BUD, NYC, LAX, NRT · nebo jiný měsíc';
+                grid.innerHTML = '';
+                return;
+            }
+            allDeals = results;
+            const label = [q, date].filter(Boolean).join(' · ');
+            document.getElementById('sectionTitle').textContent = `${label} — ${results.length} results`;
+        }
+    } catch {
+        const ql = (q || '').toLowerCase();
+        allDeals = allDeals.filter(d =>
+            (!ql || (d.route||'').toLowerCase().includes(ql) ||
+                     (d.airline||'').toLowerCase().includes(ql) ||
+                     (d.tags||[]).some(t => t.toLowerCase().includes(ql))) &&
+            (!date || (d.dates||'').startsWith(date))
+        );
+    }
+    render();
+    setLoading(false);
+}
+
+// ═══════════════════════════════════════════
+//  DEMO DATA
+// ═══════════════════════════════════════════
+// loadDemo() removed 2026-06-11 per Tom's rule: no fake/demo data ever.
+// Fallback when backend is offline is handled in loadDeals() (offline state in #emptyState).
+
+// ═══════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════
+function render() {
+    const grid = document.getElementById('dealsGrid');
+    const empty = document.getElementById('emptyState');
+    let deals = filterDeals(allDeals);
+
+    if (deals.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+    } else {
+        empty.style.display = 'none';
+        grid.innerHTML = deals.map(cardHTML).join('');
+    }
+
+    // Misprice banner
+    const mis = deals.filter(d => d.tags && d.tags.some(t => t.includes('MISPRICE')));
+    const banner = document.getElementById('mispriceAlert');
+    if (mis.length > 0) {
+        banner.classList.add('show');
+        document.getElementById('alertSub').textContent =
+            `${mis[0].route} — $${mis[0].price} · ${mis[0].savings}% under avg`;
+        document.getElementById('alertCount').textContent = mis.length;
+    } else {
+        banner.classList.remove('show');
+    }
+}
+
+function filterDeals(deals) {
+    let r = [...deals];
+
+    if (activeTab === 'flights') r = r.filter(d => d.type === 'flight');
+    if (activeTab === 'hotels')  r = r.filter(d => d.type === 'hotel');
+    if (activeTab === 'fire')    r = r.filter(d => d.tags && d.tags.some(t => t.includes('MISPRICE')));
+    if (activeTab === 'grey')    r = r.filter(d => d.grey_zone);
+    if (activeTab === 'prg')
+        r = r.filter(d =>
+            /PRG|prague/i.test(d.route || '') ||
+            (d.tags || []).some(t => /PRG/i.test(t))
+        );
+
+    if (activePills.has('home'))
+        r = r.filter(d => ['PRG','VIE','BUD'].some(a => (d.route||'').includes(a)));
+    if (activePills.has('fire'))
+        r = r.filter(d => d.tags && d.tags.some(t => t.includes('MISPRICE')));
+    if (activePills.has('200'))
+        r = r.filter(d => d.price <= 200);
+    if (activePills.has('grey'))
+        r = r.filter(d => d.grey_zone);
+    if (activePills.has('star8'))
+        r = r.filter(d => d.type === 'hotel');
+    if (activePills.has('short'))
+        r = r.filter(d => distOK(d, 0, 1000));
+    if (activePills.has('medium'))
+        r = r.filter(d => distOK(d, 1000, 3500));
+    if (activePills.has('longhaul'))
+        r = r.filter(d => distOK(d, 3500, Infinity));
+
+    // Filter sheet — distance bucket (single-choice)
+    if (activeDistance === 'short')
+        r = r.filter(d => distOK(d, 0, 1000));
+    else if (activeDistance === 'medium')
+        r = r.filter(d => distOK(d, 1000, 3500));
+    else if (activeDistance === 'long')
+        r = r.filter(d => distOK(d, 3500, Infinity));
+
+    // Filter sheet — airport multi-select
+    if (activeAirports.size > 0)
+        r = r.filter(d => [...activeAirports].some(a => (d.route||'').includes(a)));
+
+    if (!greyZoneOn) r = r.filter(d => !d.grey_zone);
+
+    return r.sort((a, b) => b.score - a.score);
+}
+
+function cardHTML(d, isBonus) {
+    const bonus = isBonus || isBonusFlight(d);
+    const cls = (d.score >= 9 ? 'fire' : d.score >= 6 ? 'hot' : 'good') + (bonus ? ' bonus-card' : '');
+    const emoji = d.score >= 9 ? '🔥' : d.score >= 6 ? '⚡' : '💡';
+
+    const typeTag = d.type === 'hotel'
+        ? '<span class="tag tag-hotel">🏨 Hotel</span>'
+        : '<span class="tag tag-type">✈️ Flight</span>';
+
+    const tags = (d.tags || []).map(t => {
+        const tc = t.includes('MISPRICE') ? 'tag-fire'
+                 : t.includes('HOT')      ? 'tag-hot'
+                 : t.includes('GOOD')     ? 'tag-good'
+                 : t.includes('DUMP') || t.includes('HIDDEN') || t.includes('GREY') ? 'tag-grey'
+                 : 'tag-new';
+        return `<span class="tag ${tc}">${t}</span>`;
+    }).join('');
+
+    const grey = d.grey_zone
+        ? `<div class="grey-warning">⚠️ Grey zone tactic — verify risk before booking</div>`
+        : '';
+
+    const currency = d.currency === 'USD/night' ? '/night' : '';
+
+    return `
+    <div class="deal-card ${cls}" id="deal-${d.id}" onclick="openDeal('${d.id}')">
+        <div class="card-top">
+            <div class="card-left">
+                <div class="card-route">${d.route}</div>
+                <div class="card-meta">${d.airline} · ${d.dates}</div>
+            </div>
+            <div class="card-right">
+                <div class="card-price">$${d.price}${currency}</div>
+                <div class="card-savings">↓ ${d.savings}% below avg</div>
+            </div>
+        </div>
+        <div class="card-tags">
+            ${typeTag}${tags}
+            <span class="score-pill">${emoji} ${d.score}/10</span>
+        </div>
+        ${grey}
+        <div class="card-footer">
+            <div class="card-source">
+                via ${d.source}
+                ${sourceBadge(d.source, d)}
+                ${d.status === 'shortlist' ? '<span class="source-badge badge-shortlist">📌 Shortlist</span>' : ''}
+            </div>
+            <div class="card-actions">
+                ${d.url && d.url !== '#' ? `<button class="act-btn" style="background:rgba(61,139,255,0.1);border-color:rgba(61,139,255,0.3);color:#5599ff" onclick="event.stopPropagation();openUrl('${d.url}')" title="Původní příspěvek / zdroj">🔗 Post</button>` : ''}
+                ${d.booking_url ? `<button class="act-btn" style="background:#1a6b3c;border-color:#27ae60" onclick="event.stopPropagation();openUrl('${d.booking_url}')" title="Booking.com">Book 🏨</button>` : ''}
+                <button class="act-btn send ${d.approved?'sent':''}"
+                        onclick="event.stopPropagation();sendAlert('${d.id}')"
+                        id="alert-${d.id}">
+                    ${d.approved ? '✅' : '🔔'}
+                </button>
+                <div class="action-menu-wrap">
+                    <button class="act-btn more-btn" onclick="event.stopPropagation();toggleActionMenu('${d.id}')" title="Akce">⋯</button>
+                    <div class="action-dropdown" id="menu-${d.id}">
+                        <div class="ad-item shortlist" onclick="event.stopPropagation();setDealStatus('${d.id}','shortlist','📌 Přidáno do Shortlistu')">📌 Přidat do Shortlistu</div>
+                        <div class="ad-item archive"   onclick="event.stopPropagation();setDealStatus('${d.id}','archived','📁 Přesunuto do Odložených')">📁 Odložit</div>
+                        <div class="ad-item restore"   onclick="event.stopPropagation();setDealStatus('${d.id}','active','↩️ Vráceno do aktivních')">↩️ Vrátit do aktivních</div>
+                        <div class="ad-item delete"    onclick="event.stopPropagation();setDealStatus('${d.id}','deleted','✕ Deal smazán')">✕ Smazat</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+}
+
+function sourceBadge(source, d) {
+    const s = (source || '').toLowerCase();
+    let badge = '';
+    if (s.includes('secretflying'))   badge = '<span class="source-badge badge-secretflying">SecretFlying</span>';
+    else if (s.includes('fly4free'))  badge = '<span class="source-badge badge-fly4free">Fly4Free</span>';
+    else if (s.includes('holidaypirates')) badge = '<span class="source-badge badge-holidaypirates">HolidayPirates</span>';
+    else if (s.includes('dansdeals')) badge = '<span class="source-badge badge-dansdeals">DansDeals</span>';
+    else if (s.includes('theflightdeal')) badge = '<span class="source-badge badge-mirror">TheFlightDeal</span>';
+    else if (s.includes('thriftytraveler')) badge = '<span class="source-badge badge-mirror">ThriftyTraveler</span>';
+    else if (s.includes('seats.aero')) badge = '<span class="source-badge badge-bonus">Seats.aero</span>';
+    // Bonus badge for award deals from any source
+    if (d && isBonusFlight(d)) badge += '<span class="source-badge badge-bonus">🏆 BONUS</span>';
+    return badge;
+}
+
+// Unified deal status handler
+async function setDealStatus(id, status, toastMsg) {
+    closeAllMenus();
+    try {
+        await fetch(API + '/api/deal-status', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({id, status})
+        });
+    } catch(e) { console.warn('Status update failed', e); }
+    const card = document.getElementById('deal-' + id);
+    if (card) {
+        card.style.transition = 'opacity 0.2s, transform 0.2s';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.94)';
+        setTimeout(() => {
+            card.remove();
+            // Also remove from allDeals in memory
+            allDeals = allDeals.filter(d => d.id !== id);
+        }, 210);
+    }
+    showToast(toastMsg);
+}
+
+// Legacy aliases
+async function archiveDeal(id) { await setDealStatus(id, 'archived', '📁 Přesunuto do Odložených'); }
+async function deleteDeal(id)  { await setDealStatus(id, 'deleted',  '✕ Deal smazán'); }
+
+// Action dropdown
+function toggleActionMenu(id) {
+    const menu = document.getElementById('menu-' + id);
+    const isOpen = menu.classList.contains('open');
+    closeAllMenus();
+    if (!isOpen) menu.classList.add('open');
+}
+
+function closeAllMenus() {
+    document.querySelectorAll('.action-dropdown.open').forEach(m => m.classList.remove('open'));
+}
+
+// Close menus on outside click
+document.addEventListener('click', closeAllMenus);
+
+function showToast(msg) {
+    let t = document.getElementById('toast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'toast';
+        t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 18px;border-radius:20px;font-size:13px;z-index:999;pointer-events:none;transition:opacity 0.3s';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.style.opacity = '0', 2000);
+}
+
+let showingArchived = false;
+async function toggleArchived() {
+    showingArchived = !showingArchived;
+    const iconBtn = document.getElementById('archived-icon-btn');
+    const bar = document.getElementById('archived-bar');
+    if (showingArchived) {
+        if (iconBtn) iconBtn.style.background = 'rgba(255,170,0,0.18)';
+        bar.style.display = 'flex';
+        setLoading(true);
+        try {
+            const res = await fetch(API + '/api/deals/archived');
+            allDeals = await res.json();
+            document.getElementById('sectionTitle').textContent =
+                `📁 Odložené & Expirované — ${allDeals.length} dealů`;
+        } catch(e) { allDeals = []; }
+        render();
+        setLoading(false);
+    } else {
+        if (iconBtn) iconBtn.style.background = '';
+        bar.style.display = 'none';
+        loadDeals();
+    }
+}
+
+// ═══════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════
+function openDeal(id) {
+    const d = allDeals.find(x => x.id === id);
+    if (d && d.url && d.url !== '#') window.open(d.url, '_blank');
+}
+
+function openUrl(url) {
+    if (url && url !== '#') window.open(url, '_blank');
+}
+
+async function sendAlert(id) {
+    const btn = document.getElementById('alert-' + id);
+    if (!btn) return;
+    try {
+        await fetch(API + `/api/approve/${id}`, { method: 'POST' });
+    } catch {}
+    const d = allDeals.find(x => x.id === id);
+    if (d) { d.approved = true; }
+    btn.textContent = '✅ Sent';
+    btn.classList.remove('send');
+    btn.classList.add('sent');
+}
+
+// ═══════════════════════════════════════════
+//  FILTERS
+// ═══════════════════════════════════════════
+function switchTab(tab, el) {
+    activeTab = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+    const names = { all:'Hot Deals', flights:'✈️ Flights', hotels:'🏨 Hotels',
+                    prg:'🇨🇿 PRG Deals',
+                    fire:'🔥 Misprice Alerts', grey:'⚠️ Grey Zone',
+                    shortlist:'📌 Shortlist', bonus:'🏆 Bonus Flights' };
+    document.getElementById('sectionTitle').textContent = names[tab] || tab;
+
+    if (tab === 'shortlist') {
+        loadShortlist();
+    } else if (tab === 'bonus') {
+        loadBonusFlights();
+    } else {
+        render();
+    }
+}
+
+// ── BONUS FLIGHTS detection ──
+const BONUS_KW = ['award', 'miles', 'points', 'sweet spot', 'saver', 'bonus',
+                  'mileage', 'redemption', 'flying blue', 'avios', 'skypass',
+                  'aeroplan', 'lifemiles', 'thansferwise', 'transfer bonus',
+                  'seats.aero', 'cash beats miles', '🏆', 'AWARD', 'BONUS'];
+
+function isBonusFlight(d) {
+    const text = [d.route, d.airline, d.source, d.dates, ...(d.tags||[])].join(' ').toLowerCase();
+    return BONUS_KW.some(kw => text.includes(kw.toLowerCase())) ||
+           (d.currency || '').includes('award') ||
+           (d.trip_type || '') === 'award' ||
+           (d.source || '').includes('awardtravel') ||
+           (d.tags || []).some(t => t.includes('AWARD') || t.includes('MILES') || t.includes('BONUS'));
+}
+
+async function loadBonusFlights() {
+    setLoading(true);
+    // Use allDeals already loaded, filter for bonus — then also check all DB deals
+    try {
+        const r = await fetch(API + '/api/deals?limit=1000');
+        if (r.ok) allDeals = await r.json();
+    } catch(e) {}
+    const bonus = allDeals.filter(isBonusFlight);
+    // Also filter for PRG origin if home pill active
+    const prgBonus = activePills.has('home')
+        ? bonus.filter(d => ['PRG','VIE','BUD'].some(a => (d.route||'').includes(a)))
+        : bonus;
+    const show = prgBonus.length > 0 ? prgBonus : bonus; // fallback: all bonus if none from home
+    document.getElementById('sectionTitle').textContent =
+        `🏆 Bonus Flights — ${show.length} deals`;
+    const grid = document.getElementById('dealsGrid');
+    const empty = document.getElementById('emptyState');
+    if (show.length === 0) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        empty.querySelector('.empty-title').textContent = 'Žádné bonus / award dealy';
+        empty.querySelector('.empty-sub').textContent =
+            'Příjdou z Redditu r/awardtravel, DansDeals, nebo přes Seats.aero API';
+    } else {
+        empty.style.display = 'none';
+        grid.innerHTML = show.map(d => cardHTML(d, true)).join('');
+    }
+    setLoading(false);
+}
+
+async function loadShortlist() {
+    setLoading(true);
+    try {
+        const r = await fetch(API + '/api/deals/shortlist');
+        if (r.ok) {
+            allDeals = await r.json();
+            document.getElementById('sectionTitle').textContent =
+                `📌 Shortlist — ${allDeals.length} deal${allDeals.length !== 1 ? 'y' : ''}`;
+        }
+    } catch(e) { console.warn(e); }
+    render();
+    setLoading(false);
+}
+
+function togglePill(key) {
+    if (activePills.has(key)) activePills.delete(key);
+    else activePills.add(key);
+    document.getElementById('pill-' + key)?.classList.toggle('active');
+    render();
+}
+
+function applyFilters() {
+    greyZoneOn = document.getElementById('swGrey').checked;
+
+    // Airport multi-select from sheet
+    activeAirports = new Set(
+        Array.from(document.querySelectorAll('#airportGrid .apt-chip.sel'))
+             .map(el => el.dataset.apt)
+    );
+
+    // Distance bucket (single-choice .sel inside #distanceOpts)
+    const distSel = document.querySelector('#distanceOpts .f-opt.sel');
+    activeDistance = (distSel && distSel.dataset.dist) || 'any';
+
+    closeSheet();
+    render();
+}
+
+// Helper used by sheet's airport-chip grid (multi-select toggle)
+function toggleAirportChip(el) {
+    el.classList.toggle('sel');
+}
+
+function solo(el, groupId) {
+    document.getElementById(groupId).querySelectorAll('.f-opt')
+        .forEach(o => o.classList.remove('sel'));
+    el.classList.add('sel');
+}
+
+function toggle(el) { el.classList.toggle('sel'); }
+
+// ═══════════════════════════════════════════
+//  SETTINGS
+// ═══════════════════════════════════════════
+function loadSettings() {
+    try {
+        const s = JSON.parse(localStorage.getItem('dh_settings') || '{}');
+        if (s.airports) document.getElementById('cfgAirports').value = s.airports;
+        if (s.misprice)  document.getElementById('cfgMisprice').value = s.misprice;
+        if (s.hot)       document.getElementById('cfgHot').value = s.hot;
+    } catch {}
+}
+
+async function saveSettings() {
+    const cfg = {
+        kiwiKey:     document.getElementById('cfgKiwi').value,
+        tgToken:     document.getElementById('cfgTgToken').value,
+        tgChat:      document.getElementById('cfgTgChat').value,
+        airports:    document.getElementById('cfgAirports').value,
+        misprice:    document.getElementById('cfgMisprice').value,
+        hot:         document.getElementById('cfgHot').value,
+        minScore:    document.getElementById('cfgMinScore').value,
+    };
+    localStorage.setItem('dh_settings', JSON.stringify(cfg));
+    try {
+        await fetch(API + '/api/settings', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(cfg)
+        });
+    } catch {}
+    closeSettings();
+    alert('✅ Settings saved!');
+}
+
+// ═══════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════
+function updateStats() {
+    const fire = allDeals.filter(d => d.score >= 9).length;
+    document.getElementById('statTotal').textContent = allDeals.length;
+    document.getElementById('statFire').textContent = fire;
+    document.getElementById('statTime').textContent =
+        new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+
+function setLoading(on) {
+    document.getElementById('loadingBar').classList.toggle('show', on);
+}
+
+function openFilterSheet() { document.getElementById('filterSheet').classList.add('open'); }
+function closeSheet()       { document.getElementById('filterSheet').classList.remove('open'); }
+function openSettings()     { document.getElementById('settingsPanel').classList.add('open'); }
+function closeSettings()    { document.getElementById('settingsPanel').classList.remove('open'); }
+function scrollToTop()      { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+</script>
+</body>
+</html>
