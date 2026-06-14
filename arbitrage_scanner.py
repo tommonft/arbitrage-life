@@ -392,8 +392,12 @@ def save_seen(seen_set):
 #  No Flask needed for viewing. Accumulates across runs, keeps newest 500.)
 LATEST_FILE = SCRIPT_DIR / "latest_deals.json"
 
-def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned):
-    """Save scored deals so HTML (locally or on GitHub Pages) can read them."""
+def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned, json_deals=None):
+    """Save scored deals so HTML (locally or on GitHub Pages) can read them.
+
+    If json_deals is provided, it's used as the source of items (all current posts).
+    Otherwise falls back to hot+warm+grey from this scan only.
+    """
     existing = []
     if LATEST_FILE.exists():
         try:
@@ -436,7 +440,9 @@ def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned):
             "text":     text[:200],
         }
 
-    new_items = [to_dict(s, d, t) for (s, d, t) in (hot_deals + warm_deals + grey_deals)]
+    # Prefer json_deals (all current posts) when provided; falls back to scored buckets.
+    source_items = json_deals if json_deals else (hot_deals + warm_deals + grey_deals)
+    new_items = [to_dict(s, d, t) for (s, d, t) in source_items]
 
     # Merge with existing — newest wins on duplicates, keep top 500 newest.
     by_id = {x.get("id"): x for x in existing}
@@ -560,7 +566,9 @@ def main():
     hot_deals  = []  # score >= 8  (business class from PRG = 8, mistake fare PRG = 9)
     grey_deals = []  # FuelDump or GreyZone tag, score >= 4
     warm_deals = []  # score 2-7
+    json_deals = []  # everything from this scan — for HTML feed (not deduped by 'seen')
 
+    # Telegram digest uses only NEW deals (so it doesn't repeat past alerts).
     for d in new_deals:
         score, tags = score_deal(d["title"], d.get("text", ""))
         if score < 1:
@@ -574,6 +582,13 @@ def main():
             grey_deals.append((score, d, tags))
         elif score >= 2:
             warm_deals.append((score, d, tags))
+
+    # JSON for HTML uses ALL current posts (seen or not) so the public feed
+    # stays populated even when no new posts arrive in this scan. Score is
+    # included so HTML can sort/filter; 0-score items are kept too.
+    for d in all_deals:
+        score, tags = score_deal(d["title"], d.get("text", ""))
+        json_deals.append((max(0, score), d, tags))
 
     # Sort by score descending
     hot_deals.sort(key=lambda x: x[0], reverse=True)
@@ -602,7 +617,7 @@ def main():
     save_seen(seen)
 
     # Phase 1: write the public JSON snapshot the static HTML reads on mobile.
-    save_latest_json(hot_deals, warm_deals, grey_deals, len(all_deals))
+    save_latest_json(hot_deals, warm_deals, grey_deals, len(all_deals), json_deals=json_deals)
 
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Hotovo.")
 
