@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- DEAL HUNTER — v3: iconic continent silhouettes (Atlantic view) -->
+
+  <defs>
+    <radialGradient id="globeLight" cx="0.30" cy="0.26" r="0.85">
+      <stop offset="0%"   stop-color="#F2E5C4" stop-opacity="0.45"/>
+      <stop offset="55%"  stop-color="#B8A98C" stop-opacity="0.0"/>
+      <stop offset="100%" stop-color="#3F362A" stop-opacity="0.50"/>
+    </radialGradient>
+    <filter id="bannerShadow" x="-10%" y="-30%" width="120%" height="160%">
+      <feGaussianBlur stdDeviation="3"/>
+      <feOffset dx="0" dy="4"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.4"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="globeClip">
+      <circle cx="256" cy="256" r="178"/>
+    </clipPath>
+  </defs>
+
+  <!-- BLACK BACKGROUND -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="#050505"/>
+  <rect x="6" y="6" width="500" height="500" rx="108" ry="108"
+        fill="none" stroke="#1F1F1F" stroke-width="1.5"/>
+
+  <!-- GLOBE ocean -->
+  <circle cx="256" cy="256" r="180" fill="#B8A98C"/>
+
+  <g clip-path="url(#globeClip)">
+
+    <!-- Meridians -->
+    <g fill="none" stroke="#6B5F4A" stroke-width="1.4" opacity="0.50">
+      <ellipse cx="256" cy="256" rx="40"  ry="180"/>
+      <ellipse cx="256" cy="256" rx="90"  ry="180"/>
+      <ellipse cx="256" cy="256" rx="135" ry="180"/>
+    </g>
+    <line x1="256" y1="76" x2="256" y2="436" stroke="#6B5F4A" stroke-width="1.6" opacity="0.55"/>
+
+    <!-- Parallels -->
+    <g fill="none" stroke="#6B5F4A" stroke-width="1.4" opacity="0.50">
+      <ellipse cx="256" cy="256" rx="180" ry="35"/>
+      <ellipse cx="256" cy="256" rx="170" ry="68"/>
+      <ellipse cx="256" cy="256" rx="148" ry="105"/>
+      <ellipse cx="256" cy="256" rx="105" ry="148"/>
+    </g>
+    <line x1="76" y1="256" x2="436" y2="256" stroke="#6B5F4A" stroke-width="1.8" opacity="0.65"/>
+
+    <!-- ════════ CONTINENTS (recognizable Atlantic view) ════════ -->
+    <g fill="#3F362A" stroke="#26201A" stroke-width="0.6" stroke-linejoin="round">
+
+      <!-- NORTH AMERICA: wide arctic top, Hudson Bay indent, narrowing toward Mexico, Florida hook -->
+      <path d="M 100,110
+               C 86,120 80,134 86,148
+               C 86,162 92,172 102,178
+               C 100,190 102,202 110,210
+               C 116,218 120,228 132,232
+               C 138,242 130,252 138,260
+               C 146,266 158,266 168,260
+               C 174,266 182,266 188,260
+               C 192,250 196,238 194,224
+               C 202,222 208,214 208,202
+               C 208,190 200,184 192,180
+               C 190,172 186,166 178,162
+               C 184,154 184,142 178,134
+               C 184,122 178,108 168,106
+               C 156,98 144,98 132,104
+               C 122,98 110,102 100,110 Z
+               M 200,240
+               C 196,250 198,260 206,262
+               C 214,260 218,250 214,242
+               C 208,236 202,236 200,240 Z"/>
+
+              <!-- Central America: narrow strip down to Panama -->
+              <path d="M 188,260
+                       C 186,266 190,272 196,272
+                       C 202,272 208,268 214,272
+                       C 218,278 220,286 226,290
+                       C 230,286 228,278 222,272
+                       C 218,266 212,260 204,258
+                       C 198,258 192,258 188,260 Z"/>
+
+              <!-- SOUTH AMERICA: wide top (Brazil), narrowing south, pointed Tierra del Fuego -->
+              <path d="M 222,288
+                       C 210,290 200,300 196,316
+                       C 192,332 196,350 204,366
+                       C 212,378 224,388 238,386
+                       C 248,380 250,366 250,352
+                       C 250,338 248,322 246,306
+                       C 244,294 234,286 222,288 Z
+                       M 232,388
+                       C 228,394 230,402 238,404
+                       C 246,402 248,394 244,388
+                       C 240,384 234,384 232,388 Z"/>
+
+      <!-- AFRICA: iconic horn-of-africa silhouette -->
+      <path d="M 296,162
+               C 280,164 268,180 264,200
+               C 260,222 264,246 274,268
+               C 282,288 296,304 312,310
+               C 326,310 336,300 340,286
+               C 346,270 350,254 350,238
+               C 348,220 344,202 336,186
+               C 326,170 312,160 296,162 Z
+               M 358,210
+               C 354,212 354,218 358,220
+               C 362,220 364,214 360,210
+               C 358,208 358,210 358,210 Z"/>
+
+      <!-- Madagascar -->
+      <path d="M 360,278
+               C 354,280 352,288 356,294
+               C 362,298 370,294 370,286
+               C 368,278 364,276 360,278 Z"/>
+
+      <!-- EUROPE: small bumps above Africa, irregular shape -->
+      <path d="M 280,140
+               C 272,142 268,150 274,156
+               C 286,158 298,154 308,148
+               C 312,144 310,138 300,138
+               C 290,138 284,138 280,140 Z
+               M 322,138
+               C 316,142 318,150 326,150
+               C 332,148 336,142 332,138
+               C 326,134 322,136 322,138 Z
+               M 296,134
+               C 290,136 288,140 292,142
+               C 300,142 308,138 308,134
+               C 304,130 298,130 296,134 Z"/>
+
+      <!-- GREENLAND -->
+      <path d="M 190,100
+               C 180,98 174,108 178,116
+               C 184,124 194,126 204,124
+               C 212,118 212,108 204,102
+               C 200,98 194,98 190,100 Z"/>
+
+      <!-- ICELAND -->
+      <path d="M 252,128
+               C 246,130 246,136 252,138
+               C 260,136 264,132 260,128
+               C 256,126 254,126 252,128 Z"/>
+
+      <!-- ANTARCTICA bottom rim -->
+      <path d="M 90,400
+               C 110,418 150,428 200,432
+               C 250,434 300,434 350,430
+               C 390,426 410,418 422,408
+               C 412,428 380,440 340,444
+               C 280,448 220,446 170,440
+               C 130,434 100,422 90,400 Z"/>
+
+    </g>
+
+    <!-- Highlight overlay -->
+    <circle cx="256" cy="256" r="180" fill="url(#globeLight)" pointer-events="none"/>
+  </g>
+
+  <!-- Globe rim -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#2C2620" stroke-width="3"/>
+
+  <!-- ════════ DIAGONAL BANNER ════════ -->
+  <g transform="rotate(-7 256 256)" filter="url(#bannerShadow)">
+    <!-- Left tail -->
+    <path d="M 28,232 L 80,222 L 76,294 L 22,304 L 38,268 Z"
+          fill="#F5F1E8" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M 70,232 L 86,242 L 80,290 L 64,300 Z"
+          fill="#C4BDA8" stroke="#1A1A1A" stroke-width="1.5"/>
+    <!-- Right tail -->
+    <path d="M 484,232 L 432,222 L 436,294 L 490,304 L 474,268 Z"
+          fill="#F5F1E8" stroke="#1A1A1A" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M 442,232 L 426,242 L 432,290 L 448,300 Z"
+          fill="#C4BDA8" stroke="#1A1A1A" stroke-width="1.5"/>
+    <!-- Main banner -->
+    <path d="M 70,220 L 442,220 L 460,258 L 442,296 L 70,296 L 52,258 Z"
+          fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- DEAL HUNTER -->
+    <text x="256" y="271"
+          font-family="Georgia, 'Times New Roman', serif"
+          font-size="44"
+          font-weight="900"
+          letter-spacing="4"
+          text-anchor="middle"
+          fill="#3A8FCE">DEAL HUNTER</text>
+  </g>
+</svg>
