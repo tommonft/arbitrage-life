@@ -1018,6 +1018,7 @@
     <div class="pill"        id="pill-short"   onclick="togglePill('short')">⚡ ≤1000 km</div>
     <div class="pill"        id="pill-medium"  onclick="togglePill('medium')">🌐 ≤3500 km</div>
     <div class="pill"        id="pill-longhaul"onclick="togglePill('longhaul')">🌏 >3500 km</div>
+    <div class="pill"        id="pill-no-eu-lcc" onclick="togglePill('no-eu-lcc')">🚫 EU LowCost</div>
     <div class="pill"        onclick="openFilterSheet()">≡ More filters</div>
 </div>
 
@@ -1646,6 +1647,99 @@ function render() {
     }
 }
 
+// ── EU LowCost detection ────────────────────────────────────────────
+// A deal is "European LowCost" when:
+//   (A) the airline is a known European low-cost carrier (or has the LCC tag), AND
+//   (B) both origin and destination are European airports.
+// Pill 🚫 EU LowCost, when active, hides these from the feed.
+const EU_AIRPORTS = new Set([
+    // Czech Rep, Slovakia, Austria, Hungary
+    'PRG','BRQ','OSR','KSC','BTS','VIE','SZG','LNZ','GRZ','INN','BUD','DEB',
+    // Poland, Baltic
+    'WAW','KRK','GDN','POZ','WRO','KTW','TLL','RIX','VNO','KUN','PLQ',
+    // Germany, Switzerland, Austria
+    'BER','TXL','SXF','MUC','FRA','HAM','DUS','CGN','STR','HAJ','NUE','LEJ','DTM','BRE','FMM',
+    'ZRH','GVA','BSL','BRN',
+    // Scandinavia, Iceland, Finland
+    'CPH','BLL','AAL','ARN','GOT','MMX','OSL','BGO','SVG','TRD','HEL','TMP','TKU','OUL','KEF','RKV',
+    // UK, Ireland
+    'LHR','LGW','STN','LTN','LCY','SEN','MAN','BHX','EDI','GLA','BFS','LBA','LPL','EMA','NCL','BRS','CWL',
+    'DUB','ORK','SNN','NOC',
+    // France, Belgium, Netherlands, Luxembourg
+    'CDG','ORY','BVA','NCE','MRS','LYS','TLS','BOD','NTE','MPL','BIQ','LIL','RNS','BES','BIA','MLH',
+    'AMS','RTM','EIN','MST','GRQ',
+    'BRU','CRL','ANR','LGG','OST',
+    'LUX',
+    // Spain, Portugal
+    'MAD','BCN','VLC','SVQ','BIO','AGP','PMI','IBZ','MAH','TFS','TFN','LPA','ACE','FUE','ALC','SCQ','OVD','ZAZ','PNA',
+    'LIS','OPO','FAO','FNC',
+    // Italy, Malta, Greece, Cyprus
+    'FCO','CIA','MXP','BGY','LIN','VCE','TSF','NAP','BLQ','CTA','PMO','BRI','VRN','TRN','BDS','CAG','OLB','GOA','FLR','TRS','RMI','AOI',
+    'MLA',
+    'ATH','SKG','HER','RHO','CFU','CHQ','SMI','JTR','MJT','JMK','ZTH','KGS',
+    'LCA','PFO',
+    // Balkans
+    'BEG','INI','ZAG','SPU','DBV','PUY','RJK','ZAD','LJU','SJJ','TGD','TIV','TIA','SKP','OHD','SOF','VAR','BOJ','BUH','OTP','CLJ','TSR','IAS',
+    // Turkey (border / often listed)
+    'IST','SAW','AYT','ADB','BJV',
+    // Other islands / overseas often categorized EU
+    'KEF'
+]);
+
+const EU_LOWCOST_AIRLINES = new Set([
+    'W6',   // Wizz Air
+    'FR',   // Ryanair
+    'RK',   // Ryanair UK
+    'U2',   // easyJet
+    'EC',   // easyJet Europe
+    'VY',   // Vueling
+    'EW',   // Eurowings
+    'LS',   // Jet2
+    'HV',   // Transavia
+    'TO',   // Transavia France
+    'DY',   // Norwegian
+    'D8',   // Norwegian Sweden
+    'PC',   // Pegasus
+    'XQ',   // SunExpress
+    'BJ',   // Nouvelair
+    'OR',   // TUI fly
+    'BY',   // TUI Airways
+    'V7',   // Volotea
+    'SK',   // (not LCC — SAS, removed)
+    'NT',   // Binter Canarias (regional LCC)
+    'IB',   // (IB is Iberia mainline — not LCC, but Iberia Express is I2)
+    'I2',   // Iberia Express
+    'OB',   // BoA — not EU but sometimes
+    'PI'    // PetroAir / placeholder
+]);
+
+const LCC_NAME_RE = /\b(wizz|ryanair|easyjet|vueling|eurowings|transavia|norwegian|jet ?2|pegasus|sun ?express|nouvelair|tui|volotea|binter|iberia express|smartwings)\b/i;
+
+function isEuropeanLowCost(d) {
+    if (!d || d.type !== 'flight') return false;
+    const tagsJoined = (d.tags || []).join(' ').toUpperCase();
+    const route     = (d.route || '').toUpperCase();
+    const airline   = (d.airline || '').toUpperCase();
+    const origin    = (d.origin || '').toUpperCase();
+    const dest      = (d.destination || '').toUpperCase();
+
+    // (A) LowCost detection: tag, IATA code, or name keyword
+    const isLcc = tagsJoined.includes('LCC')
+               || EU_LOWCOST_AIRLINES.has(airline.split(/\s+/)[0])
+               || LCC_NAME_RE.test(d.airline || '')
+               || LCC_NAME_RE.test(d.route   || '');
+
+    if (!isLcc) return false;
+
+    // (B) Both endpoints in EU. If origin/dest fields are empty, try parsing route.
+    let bothEU = origin && dest && EU_AIRPORTS.has(origin) && EU_AIRPORTS.has(dest);
+    if (!origin || !dest) {
+        const codes = (route.match(/\b[A-Z]{3}\b/g) || []).slice(0, 2);
+        bothEU = codes.length === 2 && EU_AIRPORTS.has(codes[0]) && EU_AIRPORTS.has(codes[1]);
+    }
+    return bothEU;
+}
+
 function filterDeals(deals) {
     let r = [...deals];
 
@@ -1675,6 +1769,8 @@ function filterDeals(deals) {
         r = r.filter(d => distOK(d, 1000, 3500));
     if (activePills.has('longhaul'))
         r = r.filter(d => distOK(d, 3500, Infinity));
+    if (activePills.has('no-eu-lcc'))
+        r = r.filter(d => !isEuropeanLowCost(d));
 
     // Filter sheet — distance bucket (single-choice)
     if (activeDistance === 'short')
