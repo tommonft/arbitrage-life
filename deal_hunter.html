@@ -223,6 +223,8 @@
         .tab.tab-bonus.active { border-bottom-color: var(--gold); color: var(--gold); }
         .tab.tab-prg { color: var(--accent); }
         .tab.tab-prg.active { border-bottom-color: var(--accent); color: var(--accent2); }
+        .tab.tab-alert { color: #DC2626; font-weight: 900; }
+        .tab.tab-alert.active { border-bottom-color: #DC2626; color: #B91C1C; }
 
         /* ── FILTER PILLS ── */
         .pills {
@@ -1036,6 +1038,7 @@
     <div class="tab" onclick="switchTab('flights',this)">✈️ Flights</div>
     <div class="tab" onclick="switchTab('hotels',this)">🏨 Hotels</div>
     <div class="tab tab-prg" onclick="switchTab('prg',this)">🇨🇿 PRG</div>
+    <div class="tab tab-alert" onclick="switchTab('prgdeal',this)">🚨 PRG DEAL</div>
     <div class="tab" onclick="switchTab('fire',this)">🔥 Misprice</div>
     <div class="tab tab-bonus" onclick="switchTab('bonus',this)">🏆 Bonus Flights</div>
     <div class="tab" onclick="switchTab('shortlist',this)">📌 Shortlist</div>
@@ -1787,6 +1790,10 @@ function filterDeals(deals) {
             /PRG|prague/i.test(d.route || '') ||
             (d.tags || []).some(t => /PRG/i.test(t))
         );
+    if (activeTab === 'prgdeal')
+        r = r.filter(d => (d.tags || []).some(t =>
+            t === 'PRG_FLIGHTS_DEAL' || t.startsWith('AIRLINE_')
+        ));
 
     if (activePills.has('home'))
         r = r.filter(d => ['PRG','VIE','BUD'].some(a => (d.route||'').includes(a)));
@@ -2045,6 +2052,7 @@ function switchTab(tab, el) {
     if (el) el.classList.add('active');
     const names = { all:'Hot Deals', flights:'✈️ Flights', hotels:'🏨 Hotels',
                     prg:'🇨🇿 PRG Deals',
+                    prgdeal:'🚨 PRG FLIGHTS DEAL — 16 preferred carriers',
                     fire:'🔥 Misprice Alerts', grey:'⚠️ Grey Zone',
                     shortlist:'📌 Shortlist', bonus:'🏆 Bonus Flights' };
     document.getElementById('sectionTitle').textContent = names[tab] || tab;

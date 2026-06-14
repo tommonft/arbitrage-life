@@ -91,6 +91,38 @@ GREY_ZONE_KEYWORDS = [
 ]
 
 # ── General high-value deal signals ──────────────────────────────────────────
+# ── PRG FLIGHTS DEAL — Tom's 16 preferred carriers ──────────────────────────
+# When ANY of these airlines + Prague keyword appear in a post → instant alert.
+PRG_FLIGHTS_DEAL_AIRLINES = [
+    "air france", "airfrance", "af ",
+    "klm", "k.l.m",
+    "delta",                   # already in DELTA_KEYWORDS but kept for explicit detection
+    "scandinavian", "sas ",
+    "korean air", "korean",
+    "turkish airlines", "turkish",
+    "lufthansa", "lh ",
+    "qantas",
+    "emirates", "ek ",
+    "etihad",
+    "finnair",
+    "british airways", "british airw", "ba ",
+    "china eastern",
+    "china southern",
+    "china airlines",
+    "xiamen",
+]
+
+PRG_KEYWORDS_DETECTOR = [
+    "prague", "prg ", " prg", "praha", "czech republic"
+]
+
+def is_prg_flights_deal(title, text=""):
+    """Return True if any of the 16 carriers + Prague keyword both present."""
+    combined = (title + " " + text).lower()
+    has_airline = any(a in combined for a in PRG_FLIGHTS_DEAL_AIRLINES)
+    has_prg     = any(p in combined for p in PRG_KEYWORDS_DETECTOR)
+    return has_airline and has_prg
+
 MISTAKE_FARE_KEYWORDS = [
     "mistake fare", "error fare", "glitch fare", "bug fare",
     "mistake", "glitch", "error price", "pricing error",
@@ -282,6 +314,18 @@ def score_deal(title, text=""):
     # General deal signals
     if any(kw in combined for kw in MEDIUM_DEAL_KEYWORDS):
         score += 1
+
+    # 🚨 PRG FLIGHTS DEAL — Tom's top priority: 16 carriers + Prague combo
+    if is_prg_flights_deal(text=text, title="") or is_prg_flights_deal(title=title, text=text):
+        score += 6        # massive boost so it lands at top of digest
+        tags.append("PRG_FLIGHTS_DEAL")
+        # Also add identified carrier as a tag for filtering
+        for a in PRG_FLIGHTS_DEAL_AIRLINES:
+            if a.strip() and a in combined:
+                # canonical airline label
+                label = a.strip().upper().replace(".", "")
+                tags.append(f"AIRLINE_{label}")
+                break
 
     return score, tags
 
@@ -605,6 +649,7 @@ def main():
     json_deals = []  # everything from this scan — for HTML feed (not deduped by 'seen')
 
     # Telegram digest uses only NEW deals (so it doesn't repeat past alerts).
+    prg_flights_alerts = []   # immediate instant alerts (Tom's top priority)
     for d in new_deals:
         score, tags = score_deal(d["title"], d.get("text", ""))
         if score < 1:
@@ -612,12 +657,31 @@ def main():
 
         is_grey = "FuelDump" in tags or "GreyZone" in tags
 
+        # PRG FLIGHTS DEAL → immediate Telegram alert (not waiting for digest)
+        if "PRG_FLIGHTS_DEAL" in tags:
+            prg_flights_alerts.append((score, d, tags))
+
         if score >= 8:
             hot_deals.append((score, d, tags))
         elif is_grey and score >= 4:
             grey_deals.append((score, d, tags))
         elif score >= 2:
             warm_deals.append((score, d, tags))
+
+    # Send instant 🚨🚨🚨 alerts for any PRG flights deals found this scan
+    for score, d, tags in prg_flights_alerts:
+        airline = next((t.replace("AIRLINE_", "") for t in tags if t.startswith("AIRLINE_")), "?")
+        title = d.get("title", "")[:200].replace("*", "").replace("[", "").replace("]", "")
+        url = d.get("url", "")
+        msg = (
+            f"🚨🚨🚨 *PRG FLIGHTS DEAL* 🚨🚨🚨\n\n"
+            f"*Airline:* {airline}\n"
+            f"*Deal:* {title}\n\n"
+            f"[Open source link]({url})\n\n"
+            f"_Score: {score} · Source: {d.get('source','?')}_"
+        )
+        send_telegram(msg)
+        print(f"[🚨] PRG FLIGHTS DEAL alert sent: {airline} — {title[:60]}")
 
     # JSON for HTML uses ALL current posts (seen or not) so the public feed
     # stays populated even when no new posts arrive in this scan. Score is
