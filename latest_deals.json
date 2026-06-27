@@ -1,5 +1,331 @@
 [
   {
+    "id": "rss_korean-air-san-francisco-kunming-china-715-roundtrip-including-all-taxes",
+    "route": "Korean Air: San Francisco – Kunming, China. $715. Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/25/korean-air-san-francisco-kunming-china-715-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 3,
+    "tags": [
+      "SkyTeam"
+    ],
+    "price": 715,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Kunming Matrix Airfare Search by ITA Software will price this at $745. Use those dates on Expedia should Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-san-francisco-milan-italy-590-basic-economy-690-regular-economy-roundtrip-including-all-taxes",
+    "route": "Scandinavian Airlines: San Francisco – Milan, Italy. $590 (Basic Economy) / $690 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-san-francisco-milan-italy-590-basic-economy-690-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 590,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Milan Matrix Airfare Search by ITA Software will price this at $604 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_qatar-airways-philadelphia-mumbai-india-879-roundtrip-including-all-taxes",
+    "route": "Qatar Airways: Philadelphia – Mumbai, India. $879. Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/qatar-airways-philadelphia-mumbai-india-879-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 879,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Mumbai Matrix Airfare Search by ITA Software will price this at $912. Use those dates Qatar Airways should Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_delta-seattle-gothenburg-sweden-495-basic-economy-715-regular-economy-roundtrip-including-all-taxes",
+    "route": "Delta: Seattle  – Gothenburg, Sweden. $495 (Basic Economy) / $715 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/delta-seattle-gothenburg-sweden-495-basic-economy-715-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 3,
+    "tags": [
+      "SkyTeam"
+    ],
+    "price": 495,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Gothenburg. Pricing will vary slightly depending on routing. The $715 fare includes advance seat assignment, a normal size Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-los-angeles-prague-czechia-597-basic-economy-697-regular-economy-roundtrip-including-all-taxes",
+    "route": "Scandinavian Airlines: Los Angeles – Prague, Czechia. $597 (Basic Economy) / $697 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-los-angeles-prague-czechia-597-basic-economy-697-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 12,
+    "tags": [
+      "PRG/VIE/BUD",
+      "PRG_FLIGHTS_DEAL",
+      "AIRLINE_SCANDINAVIAN"
+    ],
+    "price": 597,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Prague Matrix Airfare Search by ITA Software will price this at $611 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_korean-air-dallas-bangkok-thailand-935-roundtrip-including-all-taxes",
+    "route": "Korean Air: Dallas – Bangkok, Thailand. $935. Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/korean-air-dallas-bangkok-thailand-935-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 3,
+    "tags": [
+      "SkyTeam"
+    ],
+    "price": 935,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Bangkok Sample Travel Date: August 26th &#8211; September 2nd This is just ONE SAMPLE travel date, for more Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-chicago-prague-czechia-598-basic-economy-698-regular-economy-roundtrip-including-all-taxes-2",
+    "route": "Scandinavian Airlines: Chicago – Prague, Czechia. $598 (Basic Economy) / $698 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-chicago-prague-czechia-598-basic-economy-698-regular-economy-roundtrip-including-all-taxes-2/",
+    "source": "TheFlightDeal",
+    "score": 12,
+    "tags": [
+      "PRG/VIE/BUD",
+      "PRG_FLIGHTS_DEAL",
+      "AIRLINE_SCANDINAVIAN"
+    ],
+    "price": 598,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Prague Matrix Airfare Search by ITA Software will price this at $612 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-miami-tallinn-estonia-581-basic-economy-681-regular-economy-roundtrip-including-all-taxes-2",
+    "route": "Scandinavian Airlines: Miami – Tallinn, Estonia. $581 (Basic Economy) / $681 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-miami-tallinn-estonia-581-basic-economy-681-regular-economy-roundtrip-including-all-taxes-2/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 581,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Tallinn Matrix Airfare Search by ITA Software will price this at $595 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_cathay-pacific-new-york-phnom-penh-cambodia-977-roundtrip-including-all-taxes",
+    "route": "Cathay Pacific: New York – Phnom Penh, Cambodia. $977. Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/cathay-pacific-new-york-phnom-penh-cambodia-977-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 977,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Phnom Penh Sample Travel Date: September 23rd &#8211; 30th This is just ONE SAMPLE travel date, for more Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-boston-bergen-norway-427-basic-economy-527regular-economy-roundtrip-including-all-taxes",
+    "route": "Scandinavian Airlines: Boston – Bergen, Norway. $427 (Basic Economy) / $527(Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-boston-bergen-norway-427-basic-economy-527regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 427,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Bergen Matrix Airfare Search by ITA Software will price this at $441 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_american-washington-d-c-st-thomas-us-virgin-islands-250-basic-economy-320-regular-economy-roundtrip-including-all-taxes",
+    "route": "American: Washington D.C. – St. Thomas, US Virgin Islands. $250 (Basic Economy) / $320 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/american-washington-d-c-st-thomas-us-virgin-islands-250-basic-economy-320-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 250,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to St. Thomas. Pricing will vary slightly depending on routing. The $320 fare is the regular fare which allows Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-san-francisco-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes",
+    "route": "Scandinavian Airlines: San Francisco – Vienna, Austria. $615 (Basic Economy) / $715 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-san-francisco-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 6,
+    "tags": [
+      "PRG/VIE/BUD"
+    ],
+    "price": 615,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Vienna Matrix Airfare Search by ITA Software will price this at $629 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_scandinavian-airlines-los-angeles-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes",
+    "route": "Scandinavian Airlines: Los Angeles – Vienna, Austria. $615 (Basic Economy) / $715 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-los-angeles-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 6,
+    "tags": [
+      "PRG/VIE/BUD"
+    ],
+    "price": 615,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Vienna Matrix Airfare Search by ITA Software will price this at $629 (Basic Economy). Use those dates on  Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_delta-portland-copenhagen-denmark-577-basic-economy-797-regular-economy-roundtrip-including-all-taxes",
+    "route": "Delta: Portland – Copenhagen, Denmark. $577 (Basic Economy) / $797 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/delta-portland-copenhagen-denmark-577-basic-economy-797-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 3,
+    "tags": [
+      "SkyTeam"
+    ],
+    "price": 577,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Copenhagen. Pricing will vary slightly depending on routing. The $797 fare includes advance seat assignment, normal size carry-on Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_delta-phoenix-auckland-new-zealand-808-basic-economy-1008-regular-economy-roundtrip-including-all-taxes",
+    "route": "Delta: Phoenix – Auckland, New Zealand. $808 (Basic Economy) / $1,008 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/delta-phoenix-auckland-new-zealand-808-basic-economy-1008-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 3,
+    "tags": [
+      "SkyTeam"
+    ],
+    "price": 808,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale to Auckland Delta&#8217;s $1,008 fare is a regular economy fare with ONE checked bag, a normal size carry-on, no Read More",
+    "dead": false
+  },
+  {
+    "id": "rss_jetblue-new-york-houston-texas-and-vice-versa-169-basic-economy-259-regular-economy-roundtrip-including-all-taxes",
+    "route": "jetBlue: New York – Houston, Texas (and vice versa). $169 (Basic Economy) / $259 (Regular Economy). Roundtrip, including all Taxes",
+    "type": "flight",
+    "url": "https://www.theflightdeal.com/2026/06/26/jetblue-new-york-houston-texas-and-vice-versa-169-basic-economy-259-regular-economy-roundtrip-including-all-taxes/",
+    "source": "TheFlightDeal",
+    "score": 1,
+    "tags": [],
+    "price": 169,
+    "currency": "$",
+    "savings": 0,
+    "airline": "",
+    "dates": "",
+    "grey_zone": false,
+    "approved": false,
+    "created_at": "2026-06-27T13:47:53.674606",
+    "text": "\n\t\n\t\n\t\n\tA good sale for nonstop service to/from Houston The $259 fare is a regular economy fare which allows for normal size carry-on Read More",
+    "dead": false
+  },
+  {
     "id": "rss_ep-68-whats-going-right-in-travel",
     "route": "The Thrifty Traveler Podcast, Ep. 68: Something(s) Hot: What’s Going Right in Travel",
     "type": "flight",
@@ -18,7 +344,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "Don’t dwell on the bad stuff, the guys remind themselves … because there’s plenty to be excited about in travel right now! So this week on the pod, Gunnar and &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_june-25-delta-ceo-world-cup-savings",
@@ -82,27 +408,6 @@
     "dead": false
   },
   {
-    "id": "rss_korean-air-san-francisco-kunming-china-715-roundtrip-including-all-taxes",
-    "route": "Korean Air: San Francisco – Kunming, China. $715. Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/25/korean-air-san-francisco-kunming-china-715-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 3,
-    "tags": [
-      "SkyTeam"
-    ],
-    "price": 715,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Kunming Matrix Airfare Search by ITA Software will price this at $745. Use those dates on Expedia should Read More",
-    "dead": false
-  },
-  {
     "id": "rss_the-perfect-two-card-combination",
     "route": "The Perfect Two-Card Combo: Chase Sapphire Preferred® & Capital One Venture X",
     "type": "flight",
@@ -119,7 +424,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "Ever heard the expression, &#8220;It takes two to tango?&#8221; Or how about, &#8220;two peas in a pod?&#8221; Whatever your favorite idiom, the point is all the same: Some things are &#8230; Continue",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_amazon-prime-day-deals-for-travelers",
@@ -138,7 +443,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "Tuesday kicked off Amazon's annual Prime Day (multiple days, really) – the first of two annual Prime Day sales. Whether you're looking to treat yourself or get a gift for &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_june-26-aa-miles-southwest",
@@ -159,7 +464,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "Before you head out for the weekend, we've got a jam-packed newsletter for you with a hot tip on beating high airfare, a great way to redeem Southwest Rapid Rewards, &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_airfare-is-going-up-aa-miles-rates-arent",
@@ -180,209 +485,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "The antidote to high airfare might be sitting in your American AAdvantage account.&#160; We know that airfare was up nearly 30% last month (year-over-year), and if you're doing some searching &#8230; ",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-san-francisco-milan-italy-590-basic-economy-690-regular-economy-roundtrip-including-all-taxes",
-    "route": "Scandinavian Airlines: San Francisco – Milan, Italy. $590 (Basic Economy) / $690 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-san-francisco-milan-italy-590-basic-economy-690-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 590,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Milan Matrix Airfare Search by ITA Software will price this at $604 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_qatar-airways-philadelphia-mumbai-india-879-roundtrip-including-all-taxes",
-    "route": "Qatar Airways: Philadelphia – Mumbai, India. $879. Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/qatar-airways-philadelphia-mumbai-india-879-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 879,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Mumbai Matrix Airfare Search by ITA Software will price this at $912. Use those dates Qatar Airways should Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_delta-seattle-gothenburg-sweden-495-basic-economy-715-regular-economy-roundtrip-including-all-taxes",
-    "route": "Delta: Seattle  – Gothenburg, Sweden. $495 (Basic Economy) / $715 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/delta-seattle-gothenburg-sweden-495-basic-economy-715-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 3,
-    "tags": [
-      "SkyTeam"
-    ],
-    "price": 495,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Gothenburg. Pricing will vary slightly depending on routing. The $715 fare includes advance seat assignment, a normal size Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-los-angeles-prague-czechia-597-basic-economy-697-regular-economy-roundtrip-including-all-taxes",
-    "route": "Scandinavian Airlines: Los Angeles – Prague, Czechia. $597 (Basic Economy) / $697 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-los-angeles-prague-czechia-597-basic-economy-697-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 12,
-    "tags": [
-      "PRG/VIE/BUD",
-      "PRG_FLIGHTS_DEAL",
-      "AIRLINE_SCANDINAVIAN"
-    ],
-    "price": 597,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Prague Matrix Airfare Search by ITA Software will price this at $611 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_korean-air-dallas-bangkok-thailand-935-roundtrip-including-all-taxes",
-    "route": "Korean Air: Dallas – Bangkok, Thailand. $935. Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/korean-air-dallas-bangkok-thailand-935-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 3,
-    "tags": [
-      "SkyTeam"
-    ],
-    "price": 935,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Bangkok Sample Travel Date: August 26th &#8211; September 2nd This is just ONE SAMPLE travel date, for more Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-chicago-prague-czechia-598-basic-economy-698-regular-economy-roundtrip-including-all-taxes-2",
-    "route": "Scandinavian Airlines: Chicago – Prague, Czechia. $598 (Basic Economy) / $698 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-chicago-prague-czechia-598-basic-economy-698-regular-economy-roundtrip-including-all-taxes-2/",
-    "source": "TheFlightDeal",
-    "score": 12,
-    "tags": [
-      "PRG/VIE/BUD",
-      "PRG_FLIGHTS_DEAL",
-      "AIRLINE_SCANDINAVIAN"
-    ],
-    "price": 598,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Prague Matrix Airfare Search by ITA Software will price this at $612 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-miami-tallinn-estonia-581-basic-economy-681-regular-economy-roundtrip-including-all-taxes-2",
-    "route": "Scandinavian Airlines: Miami – Tallinn, Estonia. $581 (Basic Economy) / $681 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-miami-tallinn-estonia-581-basic-economy-681-regular-economy-roundtrip-including-all-taxes-2/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 581,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Tallinn Matrix Airfare Search by ITA Software will price this at $595 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_cathay-pacific-new-york-phnom-penh-cambodia-977-roundtrip-including-all-taxes",
-    "route": "Cathay Pacific: New York – Phnom Penh, Cambodia. $977. Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/cathay-pacific-new-york-phnom-penh-cambodia-977-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 977,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Phnom Penh Sample Travel Date: September 23rd &#8211; 30th This is just ONE SAMPLE travel date, for more Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-boston-bergen-norway-427-basic-economy-527regular-economy-roundtrip-including-all-taxes",
-    "route": "Scandinavian Airlines: Boston – Bergen, Norway. $427 (Basic Economy) / $527(Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-boston-bergen-norway-427-basic-economy-527regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 427,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Bergen Matrix Airfare Search by ITA Software will price this at $441 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_american-washington-d-c-st-thomas-us-virgin-islands-250-basic-economy-320-regular-economy-roundtrip-including-all-taxes",
-    "route": "American: Washington D.C. – St. Thomas, US Virgin Islands. $250 (Basic Economy) / $320 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/american-washington-d-c-st-thomas-us-virgin-islands-250-basic-economy-320-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 250,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to St. Thomas. Pricing will vary slightly depending on routing. The $320 fare is the regular fare which allows Read More",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_world-of-hyatt",
@@ -403,7 +506,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "For years, World of Hyatt was hands down our favorite hotel loyalty program&#160;&#8230; but a series of recent changes has us rethinking things. First, Hyatt introduced a new five-tiered award &#8230",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_delta-skymiles-platinum-american-express-card",
@@ -425,110 +528,7 @@
     "approved": false,
     "created_at": "2026-06-27T10:11:27.579056",
     "text": "American Express and Delta offer a suite of co-branded credit cards, ranging from a basic, no-annual-fee card with limited benefits to a top-tier (and top-dollar) card that gets you lounge &#8230; Con",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-san-francisco-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes",
-    "route": "Scandinavian Airlines: San Francisco – Vienna, Austria. $615 (Basic Economy) / $715 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-san-francisco-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 6,
-    "tags": [
-      "PRG/VIE/BUD"
-    ],
-    "price": 615,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Vienna Matrix Airfare Search by ITA Software will price this at $629 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_scandinavian-airlines-los-angeles-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes",
-    "route": "Scandinavian Airlines: Los Angeles – Vienna, Austria. $615 (Basic Economy) / $715 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/scandinavian-airlines-los-angeles-vienna-austria-615-basic-economy-715-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 6,
-    "tags": [
-      "PRG/VIE/BUD"
-    ],
-    "price": 615,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Vienna Matrix Airfare Search by ITA Software will price this at $629 (Basic Economy). Use those dates on  Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_delta-portland-copenhagen-denmark-577-basic-economy-797-regular-economy-roundtrip-including-all-taxes",
-    "route": "Delta: Portland – Copenhagen, Denmark. $577 (Basic Economy) / $797 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/delta-portland-copenhagen-denmark-577-basic-economy-797-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 3,
-    "tags": [
-      "SkyTeam"
-    ],
-    "price": 577,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Copenhagen. Pricing will vary slightly depending on routing. The $797 fare includes advance seat assignment, normal size carry-on Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_delta-phoenix-auckland-new-zealand-808-basic-economy-1008-regular-economy-roundtrip-including-all-taxes",
-    "route": "Delta: Phoenix – Auckland, New Zealand. $808 (Basic Economy) / $1,008 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/delta-phoenix-auckland-new-zealand-808-basic-economy-1008-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 3,
-    "tags": [
-      "SkyTeam"
-    ],
-    "price": 808,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale to Auckland Delta&#8217;s $1,008 fare is a regular economy fare with ONE checked bag, a normal size carry-on, no Read More",
-    "dead": false
-  },
-  {
-    "id": "rss_jetblue-new-york-houston-texas-and-vice-versa-169-basic-economy-259-regular-economy-roundtrip-including-all-taxes",
-    "route": "jetBlue: New York – Houston, Texas (and vice versa). $169 (Basic Economy) / $259 (Regular Economy). Roundtrip, including all Taxes",
-    "type": "flight",
-    "url": "https://www.theflightdeal.com/2026/06/26/jetblue-new-york-houston-texas-and-vice-versa-169-basic-economy-259-regular-economy-roundtrip-including-all-taxes/",
-    "source": "TheFlightDeal",
-    "score": 1,
-    "tags": [],
-    "price": 169,
-    "currency": "$",
-    "savings": 0,
-    "airline": "",
-    "dates": "",
-    "grey_zone": false,
-    "approved": false,
-    "created_at": "2026-06-27T10:11:27.579056",
-    "text": "\n\t\n\t\n\t\n\tA good sale for nonstop service to/from Houston The $259 fare is a regular economy fare which allows for normal size carry-on Read More",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_scandinavian-airlines-new-york-krakow-poland-555-basic-economy-655-regular-economy-roundtrip-including-all-taxes",
@@ -646,7 +646,7 @@
     "approved": false,
     "created_at": "2026-06-26T14:29:24.373547",
     "text": "We're fresh off our first-ever live recording of the Thrifty Traveler Podcast, and it was a huge hit &#8211; nearly 300 travelers joined us from destinations near and far for &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_scandinavian-airlines-san-francisco-riga-latvia-647-basic-economy-747-regular-economy-roundtrip-including-all-taxes",
@@ -684,7 +684,7 @@
     "approved": false,
     "created_at": "2026-06-26T14:29:24.373547",
     "text": "Gas prices have been a real gut punch so far this year. The national average climbed as high as $4.55 per gallon in May before easing somewhat in recent weeks, &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_qatar-airways-philadelphia-new-delhi-india-905-roundtrip-including-all-taxes",
@@ -876,7 +876,7 @@
     "approved": false,
     "created_at": "2026-06-26T11:11:10.033305",
     "text": "The first details of Delta's upcoming Delta One Lounge were presented to Atlanta officials this week, as the airport and Delta revealed their audacious new plans for the premium lounge &#8230; Continu",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_airpods-bose-headphones-sale",
@@ -895,7 +895,7 @@
     "approved": false,
     "created_at": "2026-06-26T11:11:10.033305",
     "text": "I never travel anywhere without my comfortable set of Bose noise-canceling headphones. They're the ultimate travel headphones &#8230; and lucky you, they're on sale for Amazon Prime Day at some &#8230",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_hilton-honors-chases-hidden-transfer-partner",
@@ -916,7 +916,7 @@
     "approved": false,
     "created_at": "2026-06-26T11:11:10.033305",
     "text": "You can transfer Chase points to more than a dozen loyalty programs, including four hotel chains &#8230; but Hilton Honors isn't one of them. Yet with a few extra clicks, &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_hub-captives",
@@ -935,7 +935,7 @@
     "approved": false,
     "created_at": "2026-06-25T18:15:06.440103",
     "text": "You're not seeing things: Flights are priced very differently based on your home airport, and some cities are worse than others. We're looking at you, Salt Lake City! And you, &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_delta-new-york-nairobi-kenya-956-roundtrip-including-all-taxes",
@@ -1059,7 +1059,7 @@
     "approved": false,
     "created_at": "2026-06-25T14:37:26.016455",
     "text": "Editor's note: It appears American Express may have prematurely launched this transfer bonus as it's no longer showing up. We'll have to wait until Wednesday, July 1, to see if &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_united-san-francisco-kauai-hawaii-and-vice-versa-276-basic-economy-386-regular-economy-roundtrip-including-all-taxes",
@@ -1099,7 +1099,7 @@
     "approved": false,
     "created_at": "2026-06-25T14:37:26.016455",
     "text": "Editor's note: It appears American Express may have prematurely launched this transfer bonus as it's no longer showing up. We'll have to wait until Wednesday, July 1, to see if &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_united-san-francisco-kona-hawaii-and-vice-versa-276-basic-economy-386-regular-economy-roundtrip-including-all-taxes",
@@ -1440,7 +1440,7 @@
     "approved": false,
     "created_at": "2026-06-24T14:36:19.802537",
     "text": "You won't confuse Cathay Pacific First Class for the likes of Emirates and its decked-out double-deckers with onboard spas or Etihad's luxe &#8220;Apartments.&#8221; But what Cathay may lack in style,",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_singapore-air-san-francisco-singapore-656-roundtrip-including-all-taxes",
@@ -1657,7 +1657,7 @@
     "approved": false,
     "created_at": "2026-06-24T10:52:36.974054",
     "text": "It’s official: The banks are losing their minds … with some of the best welcome bonuses we’ve ever seen, all at once. The guys start the show by debating whether &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_end-of-month-checklist",
@@ -1678,7 +1678,7 @@
     "approved": false,
     "created_at": "2026-06-24T10:52:36.974054",
     "text": "As if your to-do list wasn’t already long enough, I’m about to add a few more things to it. But don’t worry: These are the kind of “chores” that can &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_june-22-is-jal-mileage-bank-dead",
@@ -1699,7 +1699,7 @@
     "approved": false,
     "created_at": "2026-06-24T10:52:36.974054",
     "text": "Summer is officially here and we're kicking things off with a (surprisingly optimistic) look at the current state of JAL Mileage Bank, a hot deal on Apple products, big Delta &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_chase-sapphire-preferred-hotel-credit",
@@ -1718,7 +1718,7 @@
     "approved": false,
     "created_at": "2026-06-24T10:52:36.974054",
     "text": "We've long considered the *chase sapphire preferred*&#160;the best travel credit card for beginners, bar none. And with the bank recently adding a slew of new perks to the card – &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_cathay-pacific-new-york-phu-quoc-vietnam-966-roundtrip-including-all-taxes",
@@ -1759,7 +1759,7 @@
     "approved": false,
     "created_at": "2026-06-23T17:58:55.864260",
     "text": "All three senior members of our Thrifty Traveler Premium flight deal alerts team have flown LATAM business class to South America in recent months &#8230; and they won't shut up &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_korean-air-los-angeles-bangkok-thailand-828-roundtrip-including-all-taxes",
@@ -1844,7 +1844,7 @@
     "approved": false,
     "created_at": "2026-06-23T14:54:18.142014",
     "text": "American Express and Delta offer four different co-branded credit cards, ranging from a basic, no-annual-fee card with limited benefits to a top-tier (and top-dollar) card that gets you lounge access ",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_jetblue-san-francisco-marthas-vineyard-massachusetts-and-vice-versa-256-basic-economy-344-regular-economy-roundtrip-including-all-taxes",
@@ -2083,7 +2083,7 @@
     "approved": false,
     "created_at": "2026-06-23T11:19:23.611142",
     "text": "There are plenty of good reasons and perks for even occasional Delta flyers to add a co-branded SkyMiles card to your wallet: free baggage (and not just a first, but &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_hotel-deal-analyst-reporter",
@@ -2104,7 +2104,7 @@
     "approved": false,
     "created_at": "2026-06-23T11:19:23.611142",
     "text": "Are you a hotel-obsessed traveler who loves nothing more than hunting down the best redemption or tracking the latest property openings? We want you.&#160; That's right: We're looking to hire &#8230; ",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_how-to-spend-chase-points",
@@ -2144,7 +2144,7 @@
     "approved": false,
     "created_at": "2026-06-22T18:13:03.379562",
     "text": "I'm tempted to let that headline speak for itself &#8230; but I&#160;suppose&#160;I'd better explain myself.&#160; For four decades and counting, Costco has kept that tried-and-true combo of a 1/4-pou",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_credit-card-benefits-tracker",
@@ -2260,7 +2260,7 @@
     "approved": false,
     "created_at": "2026-06-22T12:09:02.522527",
     "text": "For more than a decade, we've considered the *csp* one of the best travel rewards credit cards for beginners. That still hasn't changed … in fact, after some recently added &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_delta-t-mobile-free-drink",
@@ -2303,7 +2303,7 @@
     "approved": false,
     "created_at": "2026-06-22T12:09:02.522527",
     "text": "I've got a hot take that I just have to get off my chest: Delta has quietly become the best transfer partner of American Express' Membership Rewards program &#8230; or &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_asiana-san-francisco-shanghai-china-742-roundtrip-including-all-taxes",
@@ -3419,7 +3419,7 @@
     "approved": false,
     "created_at": "2026-06-18T18:26:47.681849",
     "text": "Knowing the various ways you can pay for your next Delta flight – whether it's with cash, SkyMiles, or a partner's mileage program – could be the difference between being &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_korean-air-los-angeles-fuzhou-china-705-roundtrip-including-all-taxes",
@@ -3501,7 +3501,7 @@
     "approved": false,
     "created_at": "2026-06-18T15:30:52.433744",
     "text": "LifeMiles is the quirky – but relatively useful – mileage program run by the Colombian airline, Avianca. Its website isn't the easiest to use (though, it's gotten better), and you'll &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_american-phoenix-madrid-spain-710-basic-economy-930-regular-economy-roundtrip-including-all-taxes",
@@ -3771,7 +3771,7 @@
     "approved": false,
     "created_at": "2026-06-18T10:24:11.593725",
     "text": "Every quarter, Chase mixes up the spending categories in which you can earn a 5% cash back bonus (or 5x Chase Ultimate Rewards® points) on up to $1,500 of spending &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_podcast-live-show-recap",
@@ -3874,7 +3874,7 @@
     "approved": false,
     "created_at": "2026-06-17T15:38:34.342488",
     "text": "The *chase sapphire preferred* just rolled out the biggest, limited-time offer we've ever seen: bonus_miles_full This is up considerably from the old 75,000-point bonus (with the same spending require",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_how-to-book-finnair-avios-deals",
@@ -3895,7 +3895,7 @@
     "approved": false,
     "created_at": "2026-06-17T15:38:34.342488",
     "text": "Once a very niche program in the world of points and miles, Finnair Avios has become one of our favorite ways to book award flights &#8230; whether you want to &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_asiana-san-francisco-beijing-china-852-roundtrip-including-all-taxes",
@@ -4148,7 +4148,7 @@
     "approved": false,
     "created_at": "2026-06-17T11:02:15.011120",
     "text": "On the heels of a major (and mostly positive &#8211; with one big catch) update that added tons of new benefits without raising its $95 annual fee, Chase is giving &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_chase-business-card-bonus-offer-roundup",
@@ -4169,7 +4169,7 @@
     "approved": false,
     "created_at": "2026-06-16T16:58:59.221325",
     "text": "Chase seems dead-set on celebrating Christmas in June after rolling out big bonus offers on a slew of popular business cards. If you're a small business owner (and trust us, &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_pinehurst-golf-trip-tips",
@@ -4188,7 +4188,7 @@
     "approved": false,
     "created_at": "2026-06-16T16:58:59.221325",
     "text": "I've been obsessed with golf my entire life. And if you're the same way, there is no place in America you need to visit more than Pinehurst – a little &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_ep-66-airline-alliances",
@@ -4210,7 +4210,7 @@
     "approved": false,
     "created_at": "2026-06-16T16:58:59.221325",
     "text": "SkyTeam and Star Alliance might seem like boring corporate brands, but understanding airline alliances &#8211; and how to use them to your advantage &#8211; is absolutely critical for leveling up &#82",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_korean-air-los-angeles-ho-chi-minh-city-vietnam-934-roundtrip-including-all-taxes",
@@ -4396,7 +4396,7 @@
     "approved": false,
     "created_at": "2026-06-16T11:16:14.839545",
     "text": "Delta and American Express offer a wide portfolio of co-branded credit cards, each with a different look, benefits, and annual fee. With new benefits recently added and big, limited-time welcome &#823",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_thrifty-traveler-podcast-live-june-12",
@@ -4417,7 +4417,7 @@
     "approved": false,
     "created_at": "2026-06-16T11:16:14.839545",
     "text": "The date has finally arrived, and I can't believe it. In fact, the only thing that's harder to believe is this: More than 270 podcast fans, travelers, and fellow &#8220;sickos&#8221; &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_jetblue-san-francisco-buffalo-new-york-and-vice-versa-258-basic-economy-346-regular-economy-roundtrip-including-all-taxes",
@@ -4628,7 +4628,7 @@
     "approved": false,
     "created_at": "2026-06-15T12:20:16.841570",
     "text": "There's about to be a whole lot more TSA PreCheck members &#8230; and it could lead to far longer lines at your home airport.&#160; The single-most popular travel credit card &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_delta-companion-ticket",
@@ -4650,7 +4650,7 @@
     "approved": false,
     "created_at": "2026-06-15T12:20:16.841570",
     "text": "If you're a frequent Delta flyer, odds are you've got a co-branded Delta credit card in your wallet. While the *delta skymiles gold card* is the most popular choice, two &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_capital-one-dulles-lounge-temporary-closure",
@@ -4669,7 +4669,7 @@
     "approved": false,
     "created_at": "2026-06-15T12:20:16.841570",
     "text": "Capital One has raised the bar for airport lounges, building out a network of them that are free for travelers with the *venture x* &#8211; plus, two restaurant-like spaces in &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_things-were-excited-about-in-air-travel",
@@ -4688,7 +4688,7 @@
     "approved": false,
     "created_at": "2026-06-15T12:20:16.841570",
     "text": "There's enough doom and gloom in travel to make you want to cover your eyes and ears and just stay home this year. But that's only the case if you &#8230; Continued",
-    "dead": false
+    "dead": true
   },
   {
     "id": "rss_delta-seattle-bergen-norway-551-basic-economy-771-regular-economy-roundtrip-including-all-taxes",
