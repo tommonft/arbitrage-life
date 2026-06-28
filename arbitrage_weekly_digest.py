@@ -16,8 +16,8 @@ import json, os, re, html, time, urllib.request
 from datetime import datetime, date
 import xml.etree.ElementTree as ET
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8681607136:AAH4s4aV1A5D9Yk9f6sXsBZK38FkFIFQDrw")
-CHAT_ID   = int(os.environ.get("CHAT_ID", "313240215"))
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "").strip()
+CHAT_ID   = int(os.environ.get("CHAT_ID", "0").strip() or "0")
 
 HEADERS = {"User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
                           "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")}

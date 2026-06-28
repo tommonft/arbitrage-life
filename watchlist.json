@@ -1,27 +1,76 @@
 {
-  "_comment": "Tom's flight watchlists. Edit dates, thresholds, airports here. The scanner reads this daily.",
-  "watches": {
+  "_comment": "Tom's master watchlist. Sub-categorized. Each item has type+config. Scanner reads daily.",
+  "_version": 2,
+
+  "flights": {
     "PRG_ASU_oct": {
       "label": "PRG → Asunción · October 2026",
+      "type": "flight",
+      "category": "trip",
       "origin_codes": ["PRG", "VIE", "BUD"],
       "destination_codes": ["ASU"],
       "depart_window": ["2026-10-01", "2026-10-07"],
       "return_window": ["2026-10-17", "2026-10-23"],
       "trip_type": "roundtrip",
+      "cabin": "economy",
       "currency": "EUR",
       "alert_below_eur": 1500,
-      "alert_below_avg_pct": 15
+      "alert_below_avg_pct": 15,
+      "priority": "high",
+      "tags": ["competition", "tom-personal"],
+      "notes": "INTL-EVENT Pan-American competition. Need confirmation by 2026-09-01."
     },
     "PRG_TYO_nov": {
       "label": "PRG → Tokyo · November 2026",
+      "type": "flight",
+      "category": "trip",
       "origin_codes": ["PRG", "VIE", "BUD"],
       "destination_codes": ["HND", "NRT"],
       "depart_window": ["2026-11-11", "2026-11-17"],
       "return_window": ["2026-11-27", "2026-12-03"],
       "trip_type": "roundtrip",
+      "cabin": "economy",
       "currency": "EUR",
       "alert_below_eur": 900,
-      "alert_below_avg_pct": 15
+      "alert_below_avg_pct": 15,
+      "priority": "high",
+      "tags": ["competition", "tom-personal"],
+      "notes": "Tokyo legacy event. Asia Pacific season."
+    }
+  },
+
+  "hotels": {
+    "_comment": "Hotel watches via Booking/Hotels.com price tracking (Phase 2 — manual for now). Add stays here, scanner will check Travelpayouts/Booking API."
+  },
+
+  "cars": {
+    "_comment": "Car rental watches (Phase 2). Useful for goal 2028 / multi-week trips."
+  },
+
+  "miles_redemption": {
+    "_comment": "Award sweet spots Tom is monitoring. Phase 2 — needs award.travel API.",
+    "FB_to_KE": {
+      "label": "Flying Blue → Korean Air SkyPass (transfer bonus tracker)",
+      "type": "miles_partner",
+      "priority": "watch",
+      "trigger": "transfer_bonus_25pct_or_better",
+      "notes": "Korean Air SkyPass is FB partner. Watch for 25%+ transfer bonuses."
+    }
+  },
+
+  "lifehacks_active": {
+    "_comment": "Currently active lifehacks Tom is exploiting — scanner logs status weekly.",
+    "amex_referral_chain": {
+      "label": "AMEX Platinum referral chain (TR-only)",
+      "status": "active",
+      "review_date": "2026-08-01",
+      "notes": "Use existing TR card to refer family members. 25k MR per referral."
+    },
+    "fb_status_match_2026": {
+      "label": "Flying Blue status match opportunities",
+      "status": "monitor",
+      "review_date": "2026-12-31",
+      "notes": "Yearly status renewal threshold for Platinum For Life: 2026 is critical year."
     }
   }
 }

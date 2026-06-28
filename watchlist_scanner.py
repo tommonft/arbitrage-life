@@ -113,11 +113,17 @@ def daterange(start: str, end: str):
 
 # ── Persistence ───────────────────────────────────────────────────────────────
 def load_watchlist():
+    """Load watchlist config. Supports v1 (watches key) and v2 (flights/hotels/cars/miles)."""
     if not WATCHLIST_FILE.exists():
         print(f"[!] {WATCHLIST_FILE} not found")
         sys.exit(1)
     with open(WATCHLIST_FILE) as f:
-        return json.load(f).get("watches", {})
+        cfg = json.load(f)
+    # v1 → just watches dict
+    if "watches" in cfg:
+        return cfg["watches"]
+    # v2 → return flights dict (only flights are scanned by THIS scanner)
+    return {k: v for k, v in cfg.get("flights", {}).items() if not k.startswith("_")}
 
 def load_prices():
     if not PRICES_FILE.exists():

@@ -284,6 +284,24 @@
             padding: 40px 20px;
             color: var(--ink-dim);
         }
+        .wl-subtab {
+            padding: 8px 14px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            color: var(--ink-dim);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s ease;
+            border: 1px solid transparent;
+        }
+        .wl-subtab.active {
+            background: rgba(120,200,255,0.15);
+            color: #88c5ff;
+            border-color: rgba(120,200,255,0.4);
+        }
+        .wl-subtab:hover { background: rgba(255,255,255,0.08); }
         .wl-empty code {
             background: var(--card);
             padding: 2px 6px;
@@ -1103,6 +1121,7 @@
     <div class="tab" onclick="switchTab('flights',this)">✈️ Flights</div>
     <div class="tab" onclick="switchTab('hotels',this)">🏨 Hotels</div>
     <div class="tab tab-prg" onclick="switchTab('prg',this)">🇨🇿 PRG</div>
+    <div class="tab tab-prg" onclick="switchTab('prgany',this)" title="EVERYTHING with Prague — flights, hotels, packages, transit, any mention">🇨🇿 PRG ANY</div>
     <div class="tab tab-alert" onclick="switchTab('prgdeal',this)">🚨 PRG DEAL</div>
     <div class="tab tab-watch" onclick="switchTab('watchlist',this)">🎯 Watchlist</div>
     <div class="tab" onclick="switchTab('fire',this)">🔥 Misprice</div>
@@ -1928,6 +1947,8 @@ function filterDeals(deals) {
         r = r.filter(d => (d.tags || []).some(t =>
             t === 'PRG_FLIGHTS_DEAL' || t.startsWith('AIRLINE_')
         ));
+    if (activeTab === 'prgany')
+        r = r.filter(d => (d.tags || []).includes('PRG_ANY'));
     if (activeTab === 'usa')
         r = r.filter(d => (d.tags || []).includes('USA_ORIGIN'));
 
@@ -2189,6 +2210,7 @@ function switchTab(tab, el) {
     const names = { all:'Hot Deals', flights:'✈️ Flights', hotels:'🏨 Hotels',
                     prg:'🇨🇿 PRG Deals',
                     prgdeal:'🚨 PRG FLIGHTS DEAL — 16 preferred carriers',
+                    prgany:'🇨🇿 PRG ANYTHING — flights, hotels, packages, transit',
                     watchlist:'🎯 Watchlist — flight price monitor',
                     fire:'🔥 Misprice Alerts', grey:'⚠️ Grey Zone',
                     shortlist:'📌 Shortlist', bonus:'🏆 Bonus Flights',
@@ -2217,23 +2239,102 @@ function switchTab(tab, el) {
 // ──────────────────────────────────────────────────────────────
 //  WATCHLIST renderer — reads watchlist.json + watchlist_prices.json
 // ──────────────────────────────────────────────────────────────
+let wlActiveSubtab = 'flights';
+function switchWatchlistSubtab(sub) {
+    wlActiveSubtab = sub;
+    document.querySelectorAll('.wl-subtab').forEach(t => t.classList.remove('active'));
+    const btn = document.getElementById('wlsub-' + sub);
+    if (btn) btn.classList.add('active');
+    renderWatchlist();
+}
+
 async function renderWatchlist() {
     const grid  = document.getElementById('dealsGrid');
     const empty = document.getElementById('emptyState');
     if (empty) empty.style.display = 'none';
     grid.innerHTML = '<div class="wl-section" id="wlContent">Loading watchlist...</div>';
 
-    let watches = {}, prices = {};
+    let cfg = {}, prices = {};
     try {
         const wRes = await fetch('./watchlist.json', { cache: 'no-store' });
-        if (wRes.ok) watches = (await wRes.json()).watches || {};
+        if (wRes.ok) cfg = await wRes.json();
     } catch(e) { /* fine — no config = no watches */ }
     try {
         const pRes = await fetch('./watchlist_prices.json', { cache: 'no-store' });
         if (pRes.ok) prices = await pRes.json();
     } catch(e) { /* fine — no history yet */ }
 
+    // Support both v1 (watches key) and v2 (flights/hotels/cars/miles/lifehacks)
+    const flights   = cfg.flights || cfg.watches || {};
+    const hotels    = cfg.hotels  || {};
+    const cars      = cfg.cars    || {};
+    const miles     = cfg.miles_redemption || {};
+    const lifehacks = cfg.lifehacks_active  || {};
+
+    // Strip _comment-only keys
+    const cleanFlights = Object.fromEntries(Object.entries(flights).filter(([k]) => !k.startsWith('_')));
+    const cleanHotels  = Object.fromEntries(Object.entries(hotels).filter(([k]) => !k.startsWith('_')));
+    const cleanCars    = Object.fromEntries(Object.entries(cars).filter(([k]) => !k.startsWith('_')));
+    const cleanMiles   = Object.fromEntries(Object.entries(miles).filter(([k]) => !k.startsWith('_')));
+    const cleanLife    = Object.fromEntries(Object.entries(lifehacks).filter(([k]) => !k.startsWith('_')));
+
+    // SUB-TAB HEADER
+    const subtabHTML = `
+      <div class="wl-subtabs" style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:10px">
+        <div class="wl-subtab ${wlActiveSubtab==='flights'?'active':''}" id="wlsub-flights" onclick="switchWatchlistSubtab('flights')">✈️ Flights (${Object.keys(cleanFlights).length})</div>
+        <div class="wl-subtab ${wlActiveSubtab==='hotels'?'active':''}"  id="wlsub-hotels"  onclick="switchWatchlistSubtab('hotels')">🏨 Hotels (${Object.keys(cleanHotels).length})</div>
+        <div class="wl-subtab ${wlActiveSubtab==='cars'?'active':''}"    id="wlsub-cars"    onclick="switchWatchlistSubtab('cars')">🚗 Cars (${Object.keys(cleanCars).length})</div>
+        <div class="wl-subtab ${wlActiveSubtab==='miles'?'active':''}"   id="wlsub-miles"   onclick="switchWatchlistSubtab('miles')">🏆 Miles (${Object.keys(cleanMiles).length})</div>
+        <div class="wl-subtab ${wlActiveSubtab==='lifehacks'?'active':''}" id="wlsub-lifehacks" onclick="switchWatchlistSubtab('lifehacks')">🎰 Lifehacks (${Object.keys(cleanLife).length})</div>
+      </div>`;
+
     const wlEl = document.getElementById('wlContent');
+
+    // Render the currently selected sub-tab
+    if (wlActiveSubtab === 'lifehacks') {
+        const lifeCards = Object.entries(cleanLife).map(([id, l]) => `
+          <div class="wl-card">
+            <div class="wl-card-label">🎰 ${l.label || id}</div>
+            <div class="wl-card-row"><span class="wl-card-label-l">Status</span>
+              <span class="wl-card-label-v" style="color:${l.status==='active'?'#7ee787':'var(--ink-dim)'}">${l.status || '—'}</span></div>
+            <div class="wl-card-row"><span class="wl-card-label-l">Review</span>
+              <span class="wl-card-label-v">${l.review_date || '—'}</span></div>
+            <div class="wl-card-row"><span class="wl-card-label-l">Notes</span>
+              <span class="wl-card-label-v" style="font-size:11px">${l.notes || ''}</span></div>
+          </div>`);
+        wlEl.innerHTML = subtabHTML + (lifeCards.length ? lifeCards.join('') :
+            '<div class="wl-empty"><p>No active lifehacks. Add them to <code>watchlist.json</code> under <code>lifehacks_active</code>.</p></div>');
+        return;
+    }
+    if (wlActiveSubtab === 'miles') {
+        const mileCards = Object.entries(cleanMiles).map(([id, m]) => `
+          <div class="wl-card">
+            <div class="wl-card-label">🏆 ${m.label || id}</div>
+            <div class="wl-card-row"><span class="wl-card-label-l">Priority</span>
+              <span class="wl-card-label-v">${m.priority || '—'}</span></div>
+            <div class="wl-card-row"><span class="wl-card-label-l">Trigger</span>
+              <span class="wl-card-label-v" style="font-size:11px">${m.trigger || '—'}</span></div>
+            <div class="wl-card-row"><span class="wl-card-label-l">Notes</span>
+              <span class="wl-card-label-v" style="font-size:11px">${m.notes || ''}</span></div>
+          </div>`);
+        wlEl.innerHTML = subtabHTML + (mileCards.length ? mileCards.join('') :
+            '<div class="wl-empty"><p>No miles watches yet. Add to <code>watchlist.json</code> under <code>miles_redemption</code>.</p></div>');
+        return;
+    }
+    if (wlActiveSubtab === 'hotels' || wlActiveSubtab === 'cars') {
+        wlEl.innerHTML = subtabHTML + `
+          <div class="wl-empty">
+            <h3>${wlActiveSubtab === 'hotels' ? '🏨 Hotel' : '🚗 Car rental'} watches — Phase 2</h3>
+            <p>Coming soon. The Travelpayouts API supports hotel price tracking;
+               car rentals will use the Rentalcars affiliate API.</p>
+            <p style="margin-top:10px">Currently configured: ${wlActiveSubtab === 'hotels'
+                ? Object.keys(cleanHotels).length : Object.keys(cleanCars).length} watches.</p>
+          </div>`;
+        return;
+    }
+
+    // wlActiveSubtab === 'flights' (default)
+    const watches = cleanFlights;
     if (Object.keys(watches).length === 0) {
         wlEl.innerHTML = `
           <div class="wl-empty">
@@ -2307,9 +2408,9 @@ async function renderWatchlist() {
         </div>`;
     });
 
-    wlEl.innerHTML = `
+    wlEl.innerHTML = subtabHTML + `
       <div style="padding:8px 0 16px;color:var(--ink-dim);font-size:12px;border-bottom:1px solid var(--border);margin-bottom:14px">
-        Daily scan at 09:00 UTC via GitHub Actions (Travelpayouts API).
+        3× daily scan (06:00 / 14:00 / 22:00 UTC) via GitHub Actions (Travelpayouts API).
         Alerts trigger when price drops below threshold or 15% under 7-day avg.
       </div>
       ${blocks.join('')}`;

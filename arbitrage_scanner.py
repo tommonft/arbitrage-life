@@ -29,9 +29,12 @@ import xml.etree.ElementTree as ET
 
 # ── Config ──────────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent.resolve()
-# Reads from env (GitHub Actions secrets) or falls back to hardcoded (local Mac run)
-BOT_TOKEN   = os.environ.get("BOT_TOKEN", "8681607136:AAH4s4aV1A5D9Yk9f6sXsBZK38FkFIFQDrw")
-CHAT_ID     = int(os.environ.get("CHAT_ID", "313240215"))
+# Reads ONLY from env (GitHub Actions secrets). Fallback hardcoded values REMOVED
+# 2026-06-28 after GitGuardian leak detection (repo went public).
+BOT_TOKEN   = os.environ.get("BOT_TOKEN", "").strip()
+CHAT_ID     = int(os.environ.get("CHAT_ID", "0").strip() or "0")
+if not BOT_TOKEN or not CHAT_ID:
+    print("[!] BOT_TOKEN or CHAT_ID missing in env — Telegram alerts will be skipped")
 SEEN_FILE   = SCRIPT_DIR / "seen_deals.json"
 
 # ── Primary Departure Airports — PRG / VIE / BUD ─────────────────────────────
@@ -123,6 +126,20 @@ def is_prg_flights_deal(title, text=""):
     has_airline = any(a in combined for a in PRG_FLIGHTS_DEAL_AIRLINES)
     has_prg     = any(p in combined for p in PRG_KEYWORDS_DETECTOR)
     return has_airline and has_prg
+
+# 🇨🇿 PRG ANYTHING — Tom wants INSTANT alert for ANY Prague-related deal
+# (flights from/to/via PRG, hotels in Prague, packages, restaurants, transit)
+PRG_ANY_KEYWORDS = [
+    "prague", "praha", "prg", "czech republic", "czechia",
+    "vaclav havel", "ruzyne",            # airport names
+]
+
+def is_prg_anything(title, text=""):
+    """True if ANY Prague reference appears anywhere in title or text.
+    Wider net than is_prg_flights_deal — catches hotels, packages, mistake fares,
+    visa news, transit deals, anything mentioning Prague."""
+    combined = (title + " " + text).lower()
+    return any(kw in combined for kw in PRG_ANY_KEYWORDS)
 
 MISTAKE_FARE_KEYWORDS = [
     "mistake fare", "error fare", "glitch fare", "bug fare",
@@ -414,6 +431,10 @@ def score_deal(title, text=""):
     # 🇺🇸 USA-ORIGIN detection (Tom is in EU; USA→world deals clog the digest)
     if is_usa_origin(title, text):
         tags.append("USA_ORIGIN")
+
+    # 🇨🇿 PRG_ANY — any Prague reference (from/to/in/via). Tom wants instant alert.
+    if is_prg_anything(title, text):
+        tags.append("PRG_ANY")
 
     return score, tags
 
@@ -891,26 +912,32 @@ def main():
     # We now route deals into 5 category buckets so Telegram gets SEPARATE messages
     # per category (Tom can mute each category independently).
     prg_flights_alerts = []         # immediate instant alerts (Tom's top priority)
-    cat_prg     = []   # 🇨🇿 PRG/VIE/BUD origin
+    prg_any_alerts     = []         # 🇨🇿 INSTANT — anything Prague-related
+    cat_prg     = []   # 🇨🇿 PRG ANYTHING (incl. hotels, packages, transit)
     cat_mispgrey = []  # 💥 Mistake / Grey zone
-    cat_hotels  = []   # 🏨 Hotels
+    cat_hotels  = []   # 🏨 Hotels (non-PRG)
     cat_eu      = []   # 🌍 Other EU
     cat_usa     = []   # 🇺🇸 USA → World
 
     for d in new_deals:
         score, tags = score_deal(d["title"], d.get("text", ""))
-        if score < 1:
-            continue
+        if score < 1 and "PRG_ANY" not in tags:
+            continue   # PRG_ANY items bypass the score floor (Tom wants ALL Prague)
 
         is_grey   = "FuelDump" in tags or "GreyZone" in tags or "MistakeFare" in tags
         is_hotel  = any(k in (d.get("title","") + " " + d.get("text","")).lower()
                         for k in ("hotel", "resort", "/night", " night ", "all-inclusive"))
         is_usa    = "USA_ORIGIN" in tags
-        is_prg    = "PRG/VIE/BUD" in tags or "🎯JACKPOT" in tags or "PRG_FLIGHTS_DEAL" in tags
+        is_prg    = "PRG_ANY" in tags   # widest net — Tom wants everything Prague
 
-        # PRG FLIGHTS DEAL → immediate Telegram alert (not waiting for digest)
+        # PRG FLIGHTS DEAL → immediate Telegram alert (16 specific carriers)
         if "PRG_FLIGHTS_DEAL" in tags:
             prg_flights_alerts.append((score, d, tags))
+
+        # PRG_ANY → immediate Telegram alert (anything Prague, lower urgency emoji)
+        # but only if NOT already covered by PRG_FLIGHTS_DEAL above
+        if "PRG_ANY" in tags and "PRG_FLIGHTS_DEAL" not in tags:
+            prg_any_alerts.append((score, d, tags))
 
         # Add to LEGACY buckets (kept for backwards compatibility / fallback)
         if score >= 8 and not is_usa:
@@ -946,6 +973,20 @@ def main():
         )
         send_telegram(msg)
         print(f"[🚨] PRG FLIGHTS DEAL alert sent: {airline} — {title[:60]}")
+
+    # 🇨🇿 PRG ANYTHING — instant alerts for any Prague reference (hotels, packages, etc.)
+    # Wider net than PRG_FLIGHTS_DEAL — Tom wants to know IMMEDIATELY about anything PRG.
+    for score, d, tags in prg_any_alerts:
+        title = d.get("title", "")[:200].replace("*", "").replace("[", "").replace("]", "")
+        url = d.get("url", "")
+        msg = (
+            f"🇨🇿 *PRG ANYTHING* 🇨🇿\n\n"
+            f"*Deal:* {title}\n\n"
+            f"[Open source link]({url})\n\n"
+            f"_Score: {score} · Source: {d.get('source','?')}_"
+        )
+        send_telegram(msg)
+        print(f"[🇨🇿] PRG ANY alert sent: {title[:60]}")
 
     # JSON for HTML uses ALL current posts (seen or not) so the public feed
     # stays populated even when no new posts arrive in this scan. Score is
