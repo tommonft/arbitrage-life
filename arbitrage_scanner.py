@@ -21,6 +21,7 @@ import re
 import sys
 import urllib.request
 import urllib.parse
+import urllib.error
 import html
 from datetime import datetime, date
 from pathlib import Path
@@ -229,6 +230,89 @@ SOURCES = [
         "url": "https://www.reddit.com/r/Flights/new.json?limit=15&sort=new",
         "type": "reddit_json",
     },
+    # ── HIGH-VOLUME RELIABLE RSS BLOGS (added 2026-06-14) ───────────────────
+    # These were tested and produce 80%+ of the deal volume in the old DB.
+    {
+        "name": "Fly4Free",
+        "url": "https://www.fly4free.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "Fly4Free Europe",
+        "url": "https://www.fly4free.com/category/flight-deals/europe/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "Fly4Free Error Fares",
+        "url": "https://www.fly4free.com/category/flight-deals/error-fares/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "DoctorOfCredit",
+        "url": "https://www.doctorofcredit.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "FrequentMiler",
+        "url": "https://frequentmiler.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "DansDeals",
+        "url": "https://www.dansdeals.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "UpgradedPoints",
+        "url": "https://upgradedpoints.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "OneMileAtATime",
+        "url": "https://onemileatatime.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "ThePointsGuy",
+        "url": "https://thepointsguy.com/feed/",
+        "type": "rss",
+    },
+    # ── EXTRA aggregators worth trying ──────────────────────────────────────
+    {
+        "name": "HolidayPirates",
+        "url": "https://www.holidaypirates.com/rss/all",
+        "type": "rss",
+    },
+    {
+        "name": "ViewFromTheWing",
+        "url": "https://viewfromthewing.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "MilesToMemories",
+        "url": "https://www.milestomemories.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "LiveAndLetsFly",
+        "url": "https://liveandletsfly.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "MonkeyMiles",
+        "url": "https://monkeymiles.boardingarea.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "MightyTravels",
+        "url": "https://www.mightytravels.com/feed/",
+        "type": "rss",
+    },
+    {
+        "name": "FlyerTalk Mileage Run",
+        "url": "https://www.flyertalk.com/forum/mileage-run-deals-326/external.php?type=RSS2",
+        "type": "rss",
+    },
 ]
 
 # ── Word-boundary safe matching ───────────────────────────────────────────────
@@ -327,7 +411,71 @@ def score_deal(title, text=""):
                 tags.append(f"AIRLINE_{label}")
                 break
 
+    # 🇺🇸 USA-ORIGIN detection (Tom is in EU; USA→world deals clog the digest)
+    if is_usa_origin(title, text):
+        tags.append("USA_ORIGIN")
+
     return score, tags
+
+# ── USA origin detection ─────────────────────────────────────────────────────
+# Tom lives in Prague. The deal-blog ecosystem is US-centric, so most posts
+# describe USA→world fares (LAX-TYO, JFK-LON…). We still keep them in the JSON
+# (Tom can see in the USA tab), but skip them from the Telegram digest unless
+# they also touch a home airport (PRG/VIE/BUD).
+USA_AIRPORT_CODES = {
+    "ATL","LAX","JFK","ORD","DFW","DEN","SFO","SEA","LAS","MCO","MIA","PHX",
+    "IAH","EWR","BOS","MSP","DTW","FLL","PHL","LGA","BWI","SLC","IAD","DCA",
+    "MDW","SAN","TPA","BNA","AUS","MCI","RDU","SJC","OAK","MSY","SMF","STL",
+    "RSW","PDX","CLT","CVG","IND","PIT","MEM","JAX","OKC","BUF","PWM","OMA",
+    "RIC","ABQ","BUR","ONT","LGB","SNA","HNL","OGG","KOA","LIH","ITO","ANC",
+    "FAI","JNU","BOI","COS","DAL","ELP","GEG","GRR","HPN","ICT","LIT","MHT",
+    "MKE","ORF","PBI","PSP","RNO","SAT","SAV","SDF","SYR","TUL","XNA",
+}
+USA_CITY_KEYWORDS = [
+    "los angeles","san francisco","new york","newark","boston","miami","atlanta",
+    "chicago","seattle","denver","dallas","houston","phoenix","portland","oregon",
+    "philadelphia","washington dc","washington d.c.","orlando","tampa","honolulu",
+    "san diego","las vegas","minneapolis","detroit","st. louis","st louis","nashville",
+    "austin","kansas city","raleigh","oakland","sacramento","fort lauderdale",
+    "salt lake city","baltimore","charlotte","cincinnati","pittsburgh","memphis",
+    "indianapolis","jacksonville","milwaukee","cleveland","columbus","san jose",
+    "u.s. cities","us cities","united states","usa to ","u.s. to ","u.s.→",
+]
+USA_CARRIER_KEYWORDS = [
+    "american airlines","delta:","united:","jetblue","alaska airlines",
+    "southwest","spirit airlines","frontier airlines","hawaiian airlines",
+    "sun country",
+]
+
+def is_usa_origin(title, text=""):
+    """Detect deals that originate in the USA.
+    Heuristics:
+    - airport code matching USA list appears BEFORE any non-USA airport in title
+    - title contains a USA city name in the 'origin' part (before – or to)
+    - title explicitly says 'from <USA-city>' or '<USA-city> to <world>'
+    """
+    t = (title or "").lower()
+    # Split on common origin/dest separators; take origin half
+    parts = re.split(r" to |[-–—→>]| - ", t, maxsplit=1)
+    origin_part = parts[0] if parts else t
+
+    # 1) USA city keyword in origin half
+    for kw in USA_CITY_KEYWORDS:
+        if kw in origin_part:
+            return True
+
+    # 2) Airport-code based detection — first 3-letter code in title
+    codes = re.findall(r"\b([A-Z]{3})\b", title or "")
+    if codes and codes[0] in USA_AIRPORT_CODES:
+        return True
+
+    # 3) US-only carriers in title
+    for kw in USA_CARRIER_KEYWORDS:
+        if kw in t:
+            # avoid flagging if PRG/VIE/BUD also mentioned (might be relevant)
+            if not any(h in (title + " " + text).lower() for h in ["prg","vie","bud","prague","praha","wien","vienna","budapest"]):
+                return True
+    return False
 
 # ── Fetch helpers ─────────────────────────────────────────────────────────────
 HEADERS = {
@@ -404,6 +552,61 @@ def fetch_rss(source):
         print(f"[!] Failed to fetch RSS {source['name']}: {e}")
     return deals
 
+def fetch_travelpayouts():
+    """Query Travelpayouts v2 latest-prices API for top routes from PRG/VIE/BUD.
+    Returns list of pseudo-RSS items so they merge into all_deals naturally.
+    Requires TRAVELPAYOUTS_TOKEN env var (free signup at travelpayouts.com)."""
+    token = os.environ.get("TRAVELPAYOUTS_TOKEN", "").strip()
+    if not token:
+        print("[!] TRAVELPAYOUTS_TOKEN not set — skipping Travelpayouts API")
+        return []
+    deals = []
+    # Query 3 home origins
+    for origin in ("PRG", "VIE", "BUD"):
+        params = {
+            "origin":   origin,
+            "currency": "eur",
+            "limit":    100,
+            "page":     1,
+            "sorting":  "price",
+            "token":    token,
+        }
+        url = "https://api.travelpayouts.com/v2/prices/latest?" + urllib.parse.urlencode(params)
+        try:
+            req = urllib.request.Request(url, headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                payload = json.loads(resp.read().decode())
+            if not payload.get("success"):
+                continue
+            for item in payload.get("data", []):
+                origin_c   = item.get("origin", origin)
+                dest_c     = item.get("destination", "?")
+                value      = item.get("value", 0)
+                depart     = item.get("depart_date", "")
+                ret        = item.get("return_date", "")
+                airline    = item.get("airline", "")
+                trip_type  = "RT" if ret else "OW"
+                price_str  = f"€{value}"
+                title      = f"{origin_c} → {dest_c} — {price_str} {trip_type} ({airline}, {depart}{' to ' + ret if ret else ''})"
+                deal_id    = f"tp_{origin_c}_{dest_c}_{depart}_{ret}_{value}"
+                # Skyscanner deeplink with dates
+                dep_short  = depart.replace("-","")[2:] if depart else ""
+                ret_short  = ret.replace("-","")[2:] if ret else ""
+                sky_url    = f"https://www.skyscanner.com/transport/flights/{origin_c.lower()}/{dest_c.lower()}/{dep_short}/{ret_short}/" if dep_short else f"https://www.skyscanner.com/transport/flights/{origin_c.lower()}/{dest_c.lower()}/"
+                deals.append({
+                    "id":     deal_id,
+                    "title":  title,
+                    "url":    sky_url,
+                    "text":   f"Price: {price_str} · Airline: {airline} · Depart: {depart} · Return: {ret}",
+                    "source": "Travelpayouts",
+                })
+            print(f"[✓] Travelpayouts {origin}: {len(payload.get('data',[]))} routes")
+        except urllib.error.HTTPError as e:
+            print(f"[!] Travelpayouts {origin}: HTTP {e.code}")
+        except Exception as e:
+            print(f"[!] Travelpayouts {origin}: {e}")
+    return deals
+
 def fetch_all():
     all_deals = []
     for source in SOURCES:
@@ -411,7 +614,9 @@ def fetch_all():
             all_deals.extend(fetch_reddit(source))
         elif source["type"] == "rss":
             all_deals.extend(fetch_rss(source))
-    print(f"[✓] Načteno {len(all_deals)} příspěvků ze všech zdrojů")
+    # Travelpayouts API (separate from RSS/Reddit, runs only if token set)
+    all_deals.extend(fetch_travelpayouts())
+    print(f"[✓] Načteno {len(all_deals)} příspěvků ze všech zdrojů (vč. Travelpayouts)")
     return all_deals
 
 # ── Load/save seen deals ──────────────────────────────────────────────────────
@@ -656,6 +861,15 @@ def main():
             continue
 
         is_grey = "FuelDump" in tags or "GreyZone" in tags
+
+        # 🇺🇸 SKIP USA-origin from Telegram (Tom is in EU). They still go to JSON
+        # so the app's USA tab shows them. Only block from chat noise.
+        # Exception: USA origin BUT also mentions PRG/VIE/BUD or AF/KLM/Delta-from-PRG.
+        is_usa_only = "USA_ORIGIN" in tags and not any(
+            t in tags for t in ("PRG/VIE/BUD", "🎯JACKPOT", "PRG_FLIGHTS_DEAL", "Delta+PRG")
+        )
+        if is_usa_only:
+            continue   # keeps it out of Telegram lists, but JSON still gets it below
 
         # PRG FLIGHTS DEAL → immediate Telegram alert (not waiting for digest)
         if "PRG_FLIGHTS_DEAL" in tags:

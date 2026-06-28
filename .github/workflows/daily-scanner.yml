@@ -29,6 +29,7 @@ jobs:
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
+          TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}
         run: python3 arbitrage_scanner.py
 
       - name: Save seen deals + latest deals JSON (for HTML on GitHub Pages)

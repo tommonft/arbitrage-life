@@ -1,0 +1,27 @@
+{
+  "_comment": "Tom's flight watchlists. Edit dates, thresholds, airports here. The scanner reads this daily.",
+  "watches": {
+    "PRG_ASU_oct": {
+      "label": "PRG → Asunción · October 2026",
+      "origin_codes": ["PRG", "VIE", "BUD"],
+      "destination_codes": ["ASU"],
+      "depart_window": ["2026-10-01", "2026-10-07"],
+      "return_window": ["2026-10-17", "2026-10-23"],
+      "trip_type": "roundtrip",
+      "currency": "EUR",
+      "alert_below_eur": 1500,
+      "alert_below_avg_pct": 15
+    },
+    "PRG_TYO_nov": {
+      "label": "PRG → Tokyo · November 2026",
+      "origin_codes": ["PRG", "VIE", "BUD"],
+      "destination_codes": ["HND", "NRT"],
+      "depart_window": ["2026-11-11", "2026-11-17"],
+      "return_window": ["2026-11-27", "2026-12-03"],
+      "trip_type": "roundtrip",
+      "currency": "EUR",
+      "alert_below_eur": 900,
+      "alert_below_avg_pct": 15
+    }
+  }
+}
