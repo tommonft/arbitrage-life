@@ -450,14 +450,31 @@ USA_CARRIER_KEYWORDS = [
 def is_usa_origin(title, text=""):
     """Detect deals that originate in the USA.
     Heuristics:
-    - airport code matching USA list appears BEFORE any non-USA airport in title
-    - title contains a USA city name in the 'origin' part (before – or to)
-    - title explicitly says 'from <USA-city>' or '<USA-city> to <world>'
+    - title contains a USA city name in the 'origin' part (before separator)
+    - airport code matching USA list appears in title
+    - US-only carriers in title (without EU home airport mention)
+
+    IMPORTANT: also returns True for deals that mention both USA origin AND
+    European destination (USA→EU/Asia/etc) — they're not useful for a EU-based user.
+    Returns False if the deal mentions PRG/VIE/BUD/Prague/Wien anywhere AND the
+    USA reference is only a destination (e.g. PRG→LAX).
     """
     t = (title or "").lower()
-    # Split on common origin/dest separators; take origin half
-    parts = re.split(r" to |[-–—→>]| - ", t, maxsplit=1)
+    combined = (t + " " + (text or "").lower())
+
+    # If title mentions home airport as ORIGIN (PRG to LAX), it's not USA-origin
+    # We detect by checking if "prague" / "prg" appears BEFORE any USA reference.
+    home_words = ["prg ", "prague", "praha", "vie ", "vienna", "wien", "bud ", "budapest"]
+    home_pos = min((t.find(h) for h in home_words if h in t), default=-1)
+
+    # Split on common origin/dest separators; take origin half.
+    # Includes hyphen, en-dash (–), em-dash (—), arrows, " to ", " - "
+    parts = re.split(r" to |\s*[-–—→>]\s*", t, maxsplit=1)
     origin_part = parts[0] if parts else t
+
+    # If home airport is in origin half, NOT USA-origin
+    if any(h.strip() in origin_part for h in home_words):
+        return False
 
     # 1) USA city keyword in origin half
     for kw in USA_CITY_KEYWORDS:
@@ -469,11 +486,10 @@ def is_usa_origin(title, text=""):
     if codes and codes[0] in USA_AIRPORT_CODES:
         return True
 
-    # 3) US-only carriers in title
+    # 3) US-only carriers in title — only if home airport not mentioned at all
     for kw in USA_CARRIER_KEYWORDS:
         if kw in t:
-            # avoid flagging if PRG/VIE/BUD also mentioned (might be relevant)
-            if not any(h in (title + " " + text).lower() for h in ["prg","vie","bud","prague","praha","wien","vienna","budapest"]):
+            if home_pos < 0:
                 return True
     return False
 
@@ -789,6 +805,24 @@ def tag_emoji(tags):
     }
     return " ".join(mapping.get(t, "") for t in tags if t in mapping)
 
+def send_category_message(header, deals, today_str, limit=8):
+    """Send a per-category Telegram digest. Skip silently if no deals.
+    `deals` is list of (score, deal_dict, tags) tuples sorted by score desc."""
+    if not deals:
+        return
+    lines = [f"{header} — _{today_str}_\n"]
+    for score, d, tags in deals[:limit]:
+        title  = d.get("title","")[:90].replace("*","").replace("[","").replace("]","")
+        url    = d.get("url","")
+        source = d.get("source","?")
+        emojis = tag_emoji(tags)
+        lines.append(f"• {emojis} [{title}]({url})")
+        lines.append(f"  _{source} · score {score}_\n")
+    if len(deals) > limit:
+        lines.append(f"_+ {len(deals) - limit} more in the app_")
+    send_telegram("\n".join(lines))
+    print(f"[📨] Sent category: {header[:40]} ({len(deals)} deals)")
+
 def format_daily_digest(hot_deals, warm_deals, grey_deals, today_str, total_scanned):
     lines = [f"💰 *ARBITRAGE LIFE — {today_str}*\n"]
 
@@ -854,33 +888,49 @@ def main():
     json_deals = []  # everything from this scan — for HTML feed (not deduped by 'seen')
 
     # Telegram digest uses only NEW deals (so it doesn't repeat past alerts).
-    prg_flights_alerts = []   # immediate instant alerts (Tom's top priority)
+    # We now route deals into 5 category buckets so Telegram gets SEPARATE messages
+    # per category (Tom can mute each category independently).
+    prg_flights_alerts = []         # immediate instant alerts (Tom's top priority)
+    cat_prg     = []   # 🇨🇿 PRG/VIE/BUD origin
+    cat_mispgrey = []  # 💥 Mistake / Grey zone
+    cat_hotels  = []   # 🏨 Hotels
+    cat_eu      = []   # 🌍 Other EU
+    cat_usa     = []   # 🇺🇸 USA → World
+
     for d in new_deals:
         score, tags = score_deal(d["title"], d.get("text", ""))
         if score < 1:
             continue
 
-        is_grey = "FuelDump" in tags or "GreyZone" in tags
-
-        # 🇺🇸 SKIP USA-origin from Telegram (Tom is in EU). They still go to JSON
-        # so the app's USA tab shows them. Only block from chat noise.
-        # Exception: USA origin BUT also mentions PRG/VIE/BUD or AF/KLM/Delta-from-PRG.
-        is_usa_only = "USA_ORIGIN" in tags and not any(
-            t in tags for t in ("PRG/VIE/BUD", "🎯JACKPOT", "PRG_FLIGHTS_DEAL", "Delta+PRG")
-        )
-        if is_usa_only:
-            continue   # keeps it out of Telegram lists, but JSON still gets it below
+        is_grey   = "FuelDump" in tags or "GreyZone" in tags or "MistakeFare" in tags
+        is_hotel  = any(k in (d.get("title","") + " " + d.get("text","")).lower()
+                        for k in ("hotel", "resort", "/night", " night ", "all-inclusive"))
+        is_usa    = "USA_ORIGIN" in tags
+        is_prg    = "PRG/VIE/BUD" in tags or "🎯JACKPOT" in tags or "PRG_FLIGHTS_DEAL" in tags
 
         # PRG FLIGHTS DEAL → immediate Telegram alert (not waiting for digest)
         if "PRG_FLIGHTS_DEAL" in tags:
             prg_flights_alerts.append((score, d, tags))
 
-        if score >= 8:
+        # Add to LEGACY buckets (kept for backwards compatibility / fallback)
+        if score >= 8 and not is_usa:
             hot_deals.append((score, d, tags))
-        elif is_grey and score >= 4:
+        elif is_grey and score >= 4 and not is_usa:
             grey_deals.append((score, d, tags))
-        elif score >= 2:
+        elif score >= 2 and not is_usa:
             warm_deals.append((score, d, tags))
+
+        # CATEGORY ROUTING (each deal goes into exactly ONE category)
+        if is_prg:
+            cat_prg.append((score, d, tags))
+        elif is_grey:
+            cat_mispgrey.append((score, d, tags))
+        elif is_hotel:
+            cat_hotels.append((score, d, tags))
+        elif is_usa:
+            cat_usa.append((score, d, tags))
+        else:
+            cat_eu.append((score, d, tags))
 
     # Send instant 🚨🚨🚨 alerts for any PRG flights deals found this scan
     for score, d, tags in prg_flights_alerts:
@@ -904,18 +954,23 @@ def main():
         score, tags = score_deal(d["title"], d.get("text", ""))
         json_deals.append((max(0, score), d, tags))
 
-    # Sort by score descending
-    hot_deals.sort(key=lambda x: x[0], reverse=True)
-    grey_deals.sort(key=lambda x: x[0], reverse=True)
-    warm_deals.sort(key=lambda x: x[0], reverse=True)
+    # Sort each category by score descending
+    for cat in (cat_prg, cat_mispgrey, cat_hotels, cat_eu, cat_usa,
+                hot_deals, grey_deals, warm_deals):
+        cat.sort(key=lambda x: x[0], reverse=True)
 
-    print(f"[✓] Hot: {len(hot_deals)}, Grey zone: {len(grey_deals)}, Warm: {len(warm_deals)}")
+    print(f"[✓] Categories — PRG:{len(cat_prg)} MISP/GREY:{len(cat_mispgrey)} "
+          f"HOTELS:{len(cat_hotels)} EU:{len(cat_eu)} USA:{len(cat_usa)}")
 
-    has_deals = hot_deals or grey_deals or warm_deals
+    has_deals = any((cat_prg, cat_mispgrey, cat_hotels, cat_eu, cat_usa))
 
     if has_deals or "--force" in sys.argv:
-        msg = format_daily_digest(hot_deals, warm_deals, grey_deals, today_str, len(all_deals))
-        send_telegram(msg)
+        # SEND CATEGORIZED MESSAGES (Tom can mute each independently)
+        send_category_message("🇨🇿 *PRG / VIE / BUD DEALS*",   cat_prg,      today_str, 8)
+        send_category_message("💥 *MISPRICE + GREY ZONE*",      cat_mispgrey, today_str, 6)
+        send_category_message("🏨 *HOTEL DEALS*",               cat_hotels,   today_str, 5)
+        send_category_message("🌍 *EU DEALS*",                  cat_eu,       today_str, 6)
+        send_category_message("🇺🇸 *USA → WORLD*",             cat_usa,      today_str, 5)
     else:
         # Send brief "nothing today" every 3rd day
         day_of_year = date.today().timetuple().tm_yday

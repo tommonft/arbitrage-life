@@ -1657,6 +1657,73 @@ async function refreshDeals() {
     setLoading(false);
 }
 
+// ═══════════════════════════════════════════
+//  PULL-TO-REFRESH (iOS Safari / PWA homescreen)
+// ═══════════════════════════════════════════
+// Safari in PWA mode disables native pull-to-refresh. We implement a custom one:
+// detect touchstart at scrollTop=0, track touchmove distance, trigger reload
+// after threshold (80px). Visual indicator slides in from top.
+(function setupPullToRefresh() {
+    let startY = 0;
+    let pulling = false;
+    let pullDistance = 0;
+    const THRESHOLD = 80;
+
+    const indicator = document.createElement('div');
+    indicator.id = 'ptrIndicator';
+    indicator.style.cssText = `
+        position: fixed; top: -60px; left: 0; right: 0; height: 60px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(20,30,50,0.95); color: #fff; font-size: 14px;
+        z-index: 9999; transition: top 0.15s ease; backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    `;
+    indicator.innerHTML = '<span id="ptrText">↓ Pull to refresh</span>';
+    document.addEventListener('DOMContentLoaded', () => document.body.appendChild(indicator));
+
+    document.addEventListener('touchstart', (e) => {
+        // Only trigger if at the very top of the page
+        if (window.scrollY === 0 && document.documentElement.scrollTop === 0) {
+            startY = e.touches[0].clientY;
+            pulling = true;
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!pulling) return;
+        pullDistance = e.touches[0].clientY - startY;
+        if (pullDistance <= 0) {
+            indicator.style.top = '-60px';
+            return;
+        }
+        // Cap visual at 80px so it doesn't pull the whole screen down
+        const visualOffset = Math.min(pullDistance, 100) - 60;
+        indicator.style.top = `${visualOffset}px`;
+        const text = document.getElementById('ptrText');
+        if (text) {
+            text.textContent = pullDistance >= THRESHOLD
+                ? '↻ Release to refresh'
+                : '↓ Pull to refresh';
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+        if (!pulling) return;
+        pulling = false;
+        if (pullDistance >= THRESHOLD) {
+            const text = document.getElementById('ptrText');
+            if (text) text.textContent = '⟳ Refreshing...';
+            indicator.style.top = '0px';
+            refreshDeals().finally(() => {
+                setTimeout(() => { indicator.style.top = '-60px'; }, 500);
+            });
+        } else {
+            indicator.style.top = '-60px';
+        }
+        pullDistance = 0;
+    }, { passive: true });
+})();
+
 function toggleHelp() {
     document.getElementById('helpPanel').classList.toggle('open');
 }
@@ -2127,6 +2194,14 @@ function switchTab(tab, el) {
                     shortlist:'📌 Shortlist', bonus:'🏆 Bonus Flights',
                     usa:'🇺🇸 USA-origin (excluded from Telegram)' };
     document.getElementById('sectionTitle').textContent = names[tab] || tab;
+
+    // UX: USA tab implies user wants USA-origin deals — deactivate the
+    // PRG/VIE/BUD pill which would otherwise filter them all out to zero.
+    if (tab === 'usa') {
+        activePills.delete('home');
+        const pillHome = document.getElementById('pill-home');
+        if (pillHome) pillHome.classList.remove('active');
+    }
 
     if (tab === 'shortlist') {
         loadShortlist();
