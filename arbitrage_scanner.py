@@ -134,12 +134,30 @@ PRG_ANY_KEYWORDS = [
     "vaclav havel", "ruzyne",            # airport names
 ]
 
-def is_prg_anything(title, text=""):
-    """True if ANY Prague reference appears anywhere in title or text.
-    Wider net than is_prg_flights_deal — catches hotels, packages, mistake fares,
-    visa news, transit deals, anything mentioning Prague."""
+# EU LowCost airlines — Tom WANTS THESE EXCLUDED from PRG_ANY (rutina, clog)
+EU_LCC_NAMES = [
+    "wizz", "ryanair", "easyjet", "vueling", "eurowings", "transavia",
+    "norwegian", "jet2", "jet 2", "pegasus", "sunexpress", "sun express",
+    "volotea", "smartwings", "lauda", "wizzair",
+]
+
+def is_eu_lcc(title, text=""):
+    """True if title mentions any EU low-cost carrier."""
     combined = (title + " " + text).lower()
-    return any(kw in combined for kw in PRG_ANY_KEYWORDS)
+    return any(kw in combined for kw in EU_LCC_NAMES)
+
+def is_prg_anything(title, text=""):
+    """True if ANY Prague reference appears in title/text — EXCLUDING EU LCC dealy.
+    Tom's frustration 2026-06-28: 590 alerts/day mostly Ryanair/Wizz PRG→EU rutina.
+    Now: Wizz/Ryanair/EasyJet/Vueling/Eurowings/etc. → skipped from PRG ANY."""
+    combined = (title + " " + text).lower()
+    has_prg = any(kw in combined for kw in PRG_ANY_KEYWORDS)
+    if not has_prg:
+        return False
+    # Skip if it's a EU LCC deal (Tom doesn't want Ryanair/Wizz spam)
+    if is_eu_lcc(title, text):
+        return False
+    return True
 
 MISTAKE_FARE_KEYWORDS = [
     "mistake fare", "error fare", "glitch fare", "bug fare",
@@ -974,9 +992,21 @@ def main():
         send_telegram(msg)
         print(f"[🚨] PRG FLIGHTS DEAL alert sent: {airline} — {title[:60]}")
 
-    # 🇨🇿 PRG ANYTHING — instant alerts for any Prague reference (hotels, packages, etc.)
-    # Wider net than PRG_FLIGHTS_DEAL — Tom wants to know IMMEDIATELY about anything PRG.
+    # 🇨🇿 PRG ANYTHING — INSTANT alerts (limited to top 8 per scan by score)
+    # Wider net than PRG_FLIGHTS_DEAL — Tom wants quality PRG signals only.
+    # Filters applied:
+    #   1) EU LCC airlines excluded (Ryanair/Wizz/EasyJet — too much routine clog)
+    #   2) Min score threshold = 3 (skip score 1-2 PRG mentions)
+    #   3) Top-8 cap — rest goes to digest only (prevents 590-msg flood)
+    prg_any_alerts.sort(key=lambda x: x[0], reverse=True)   # sort by score desc
+    PRG_ANY_INSTANT_CAP = 8
+    PRG_ANY_MIN_SCORE   = 3
+    sent_instant = 0
     for score, d, tags in prg_any_alerts:
+        if score < PRG_ANY_MIN_SCORE:
+            break   # rest is sorted by score so we can stop
+        if sent_instant >= PRG_ANY_INSTANT_CAP:
+            break
         title = d.get("title", "")[:200].replace("*", "").replace("[", "").replace("]", "")
         url = d.get("url", "")
         msg = (
@@ -987,6 +1017,11 @@ def main():
         )
         send_telegram(msg)
         print(f"[🇨🇿] PRG ANY alert sent: {title[:60]}")
+        sent_instant += 1
+    skipped = max(0, len(prg_any_alerts) - sent_instant)
+    if skipped:
+        print(f"[🇨🇿] {skipped} more PRG ANY items skipped from instant alerts "
+              f"(score < {PRG_ANY_MIN_SCORE} or cap {PRG_ANY_INSTANT_CAP} reached) — they're in JSON + digest")
 
     # JSON for HTML uses ALL current posts (seen or not) so the public feed
     # stays populated even when no new posts arrive in this scan. Score is

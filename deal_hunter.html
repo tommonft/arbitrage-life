@@ -1141,7 +1141,7 @@
     <div class="pill"        id="pill-short"   onclick="togglePill('short')">⚡ ≤1000 km</div>
     <div class="pill"        id="pill-medium"  onclick="togglePill('medium')">🌐 ≤3500 km</div>
     <div class="pill"        id="pill-longhaul"onclick="togglePill('longhaul')">🌏 >3500 km</div>
-    <div class="pill"        id="pill-no-eu-lcc" onclick="togglePill('no-eu-lcc')">🚫 EU LowCost</div>
+    <div class="pill active" id="pill-no-eu-lcc" onclick="togglePill('no-eu-lcc')" title="Hide all Ryanair/Wizz/EasyJet etc. — ON by default">🚫 LowCost</div>
     <div class="pill active" id="pill-hide-stale" onclick="togglePill('hide-stale')">🧹 Hide stale (14+/dead)</div>
     <div class="pill"        onclick="openFilterSheet()">≡ More filters</div>
 </div>
@@ -1496,7 +1496,7 @@
 // ═══════════════════════════════════════════
 let allDeals = [];
 let activeTab = 'all';
-let activePills = new Set(['home', 'hide-stale']);  // hide-stale on by default — keeps feed clean
+let activePills = new Set(['home', 'hide-stale', 'no-eu-lcc']);  // hide-stale + no-eu-lcc ON by default — keeps feed clean
 let greyZoneOn = false;
 let activeAirports = new Set();      // multi-select from filter sheet airport grid
 let activeDistance = 'any';          // 'any' | 'short' | 'medium' | 'long' from sheet distance opts
@@ -1573,14 +1573,88 @@ function _haversine(lat1, lon1, lat2, lon2) {
     return 2 * R * Math.asin(Math.sqrt(a));
 }
 
-// Returns distance in km between first two IATA-like 3-letter codes in d.route, or NaN.
+// City-name to coords map (lowercase keys). Covers most RSS titles which use
+// city names ("Prague to Bangkok") rather than IATA codes ("PRG-BKK").
+const CITY_COORDS = {
+    // Europe — home airports + Tom's hubs
+    'prague':[50.10,14.26], 'praha':[50.10,14.26],
+    'vienna':[48.11,16.57], 'wien':[48.11,16.57],
+    'budapest':[47.43,19.26], 'warsaw':[52.17,20.97],
+    'london':[51.47,-0.45], 'paris':[49.01,2.55], 'amsterdam':[52.31,4.76],
+    'frankfurt':[50.04,8.56], 'munich':[48.35,11.78], 'zurich':[47.46,8.55],
+    'rome':[41.80,12.25], 'milan':[45.63,8.72], 'madrid':[40.47,-3.56],
+    'barcelona':[41.30,2.08], 'lisbon':[38.78,-9.13], 'porto':[41.24,-8.68],
+    'berlin':[52.36,13.51], 'hamburg':[53.63,10.00], 'oslo':[60.19,11.10],
+    'stockholm':[59.65,17.92], 'copenhagen':[55.62,12.66], 'helsinki':[60.32,24.96],
+    'dublin':[53.42,-6.27], 'athens':[37.94,23.95], 'istanbul':[41.26,28.74],
+    'reykjavik':[63.99,-22.62],
+    // North America
+    'new york':[40.64,-73.78], 'jfk':[40.64,-73.78], 'newark':[40.69,-74.17],
+    'los angeles':[33.94,-118.40], 'san francisco':[37.62,-122.38],
+    'chicago':[41.97,-87.91], 'miami':[25.79,-80.29], 'atlanta':[33.64,-84.43],
+    'boston':[42.36,-71.01], 'washington':[38.94,-77.46], 'houston':[29.99,-95.34],
+    'dallas':[32.90,-97.04], 'denver':[39.86,-104.67], 'seattle':[47.45,-122.31],
+    'phoenix':[33.43,-112.01], 'portland':[45.59,-122.60], 'philadelphia':[39.87,-75.24],
+    'las vegas':[36.08,-115.15], 'orlando':[28.43,-81.31], 'tampa':[27.97,-82.53],
+    'honolulu':[21.32,-157.92], 'toronto':[43.68,-79.63], 'vancouver':[49.19,-123.18],
+    'montreal':[45.47,-73.74], 'mexico city':[19.43,-99.07], 'cancun':[21.04,-86.87],
+    // LatAm
+    'sao paulo':[-23.43,-46.47], 'rio':[-22.81,-43.25], 'rio de janeiro':[-22.81,-43.25],
+    'buenos aires':[-34.82,-58.54], 'lima':[-12.02,-77.11], 'bogota':[4.70,-74.14],
+    'asuncion':[-25.24,-57.52], 'santiago':[-33.39,-70.79], 'quito':[-0.13,-78.36],
+    'panama':[9.07,-79.39], 'havana':[22.99,-82.41],
+    // Asia
+    'tokyo':[35.55,139.78], 'osaka':[34.43,135.24], 'haneda':[35.55,139.78],
+    'narita':[35.77,140.39], 'bangkok':[13.69,100.75], 'singapore':[1.36,103.99],
+    'kuala lumpur':[2.74,101.71], 'manila':[14.51,121.02], 'jakarta':[-6.13,106.66],
+    'hong kong':[22.31,113.92], 'shanghai':[31.14,121.81], 'beijing':[40.08,116.58],
+    'taipei':[25.07,121.23], 'seoul':[37.46,126.44], 'incheon':[37.46,126.44],
+    'delhi':[28.57,77.10], 'mumbai':[19.09,72.87], 'colombo':[7.18,79.88],
+    'male':[4.19,73.53], 'phnom penh':[11.55,104.84], 'hanoi':[21.22,105.81],
+    'ho chi minh':[10.82,106.66], 'saigon':[10.82,106.66], 'siem reap':[13.41,103.81],
+    'denpasar':[-8.75,115.17], 'bali':[-8.75,115.17],
+    // Middle East
+    'dubai':[25.25,55.36], 'doha':[25.27,51.61], 'abu dhabi':[24.43,54.65],
+    'tel aviv':[32.01,34.89], 'amman':[31.72,35.99],
+    // Africa
+    'cairo':[30.11,31.41], 'cape town':[-33.97,18.60], 'johannesburg':[-26.13,28.24],
+    'casablanca':[33.37,-7.59], 'marrakech':[31.61,-8.04], 'nairobi':[-1.32,36.93],
+    'addis ababa':[8.98,38.80], 'lagos':[6.58,3.32],
+    // Oceania
+    'sydney':[-33.94,151.18], 'melbourne':[-37.67,144.84], 'auckland':[-37.01,174.79],
+    // Caribbean / Central
+    'kingston':[17.94,-76.79], 'san juan':[18.44,-66.00], 'punta cana':[18.57,-68.36],
+    'aguadilla':[18.50,-67.13], 'nassau':[25.04,-77.47]
+};
+
+// Returns distance in km between first two IATA codes OR city names found in route.
 function flightDistanceKm(route) {
     if (!route) return NaN;
+
+    // STRATEGY 1: try IATA codes first (works for Travelpayouts deals)
     const codes = (route.toUpperCase().match(/\b[A-Z]{3}\b/g) || [])
                     .filter(c => IATA_COORDS[c]);
-    if (codes.length < 2) return NaN;
-    const [a, b] = [IATA_COORDS[codes[0]], IATA_COORDS[codes[1]]];
-    return _haversine(a[0], a[1], b[0], b[1]);
+    if (codes.length >= 2) {
+        const [a, b] = [IATA_COORDS[codes[0]], IATA_COORDS[codes[1]]];
+        return _haversine(a[0], a[1], b[0], b[1]);
+    }
+
+    // STRATEGY 2: try city names (works for RSS titles like "Prague to Bangkok")
+    const lowerRoute = route.toLowerCase();
+    const foundCities = [];
+    // Sort city keys by length desc so "san francisco" matches before "san"
+    const cityKeys = Object.keys(CITY_COORDS).sort((a,b) => b.length - a.length);
+    for (const city of cityKeys) {
+        if (lowerRoute.includes(city)) {
+            foundCities.push(city);
+            if (foundCities.length === 2) break;
+        }
+    }
+    if (foundCities.length === 2) {
+        const [a, b] = [CITY_COORDS[foundCities[0]], CITY_COORDS[foundCities[1]]];
+        return _haversine(a[0], a[1], b[0], b[1]);
+    }
+    return NaN;
 }
 
 // Used by filterDeals — flight matches distance bucket [min, max).
@@ -1907,28 +1981,18 @@ const EU_LOWCOST_AIRLINES = new Set([
 const LCC_NAME_RE = /\b(wizz|ryanair|easyjet|vueling|eurowings|transavia|norwegian|jet ?2|pegasus|sun ?express|nouvelair|tui|volotea|binter|iberia express|smartwings)\b/i;
 
 function isEuropeanLowCost(d) {
+    // SIMPLIFIED 2026-06-28: previously required BOTH endpoints to be EU airports,
+    // but RSS titles contain city names (not IATA codes), so the both-EU check
+    // almost always failed → LCC deals leaked through. Now: ANY LCC-airline match
+    // is enough. Ryanair/Wizz/EasyJet etc. are 99% intra-EU anyway.
     if (!d || d.type !== 'flight') return false;
     const tagsJoined = (d.tags || []).join(' ').toUpperCase();
-    const route     = (d.route || '').toUpperCase();
-    const airline   = (d.airline || '').toUpperCase();
-    const origin    = (d.origin || '').toUpperCase();
-    const dest      = (d.destination || '').toUpperCase();
+    const airline    = (d.airline || '').toUpperCase();
 
-    // (A) LowCost detection: tag, IATA code, or name keyword
-    const isLcc = tagsJoined.includes('LCC')
-               || EU_LOWCOST_AIRLINES.has(airline.split(/\s+/)[0])
-               || LCC_NAME_RE.test(d.airline || '')
-               || LCC_NAME_RE.test(d.route   || '');
-
-    if (!isLcc) return false;
-
-    // (B) Both endpoints in EU. If origin/dest fields are empty, try parsing route.
-    let bothEU = origin && dest && EU_AIRPORTS.has(origin) && EU_AIRPORTS.has(dest);
-    if (!origin || !dest) {
-        const codes = (route.match(/\b[A-Z]{3}\b/g) || []).slice(0, 2);
-        bothEU = codes.length === 2 && EU_AIRPORTS.has(codes[0]) && EU_AIRPORTS.has(codes[1]);
-    }
-    return bothEU;
+    return tagsJoined.includes('LCC')
+        || EU_LOWCOST_AIRLINES.has(airline.split(/\s+/)[0])
+        || LCC_NAME_RE.test(d.airline || '')
+        || LCC_NAME_RE.test(d.route   || '');
 }
 
 function filterDeals(deals) {
