@@ -937,10 +937,19 @@ def main():
     cat_eu      = []   # 🌍 Other EU
     cat_usa     = []   # 🇺🇸 USA → World
 
+    # GLOBAL LCC EXCLUSION (Tom 2026-06-28): EU low-cost carriers do NOT enter
+    # ANY Telegram category. They still go to JSON (for the app), but Telegram
+    # noise is the user-facing problem — Ryanair/Wizz/EasyJet PRG→EU is rutina.
+    lcc_skipped_count = 0
     for d in new_deals:
         score, tags = score_deal(d["title"], d.get("text", ""))
         if score < 1 and "PRG_ANY" not in tags:
             continue   # PRG_ANY items bypass the score floor (Tom wants ALL Prague)
+
+        # ─── GLOBAL EU LCC SKIP — applies to ALL Telegram routing ───────
+        if is_eu_lcc(d.get("title", ""), d.get("text", "")):
+            lcc_skipped_count += 1
+            continue   # LCC stays in JSON via json_deals loop below; just not Telegram
 
         is_grey   = "FuelDump" in tags or "GreyZone" in tags or "MistakeFare" in tags
         is_hotel  = any(k in (d.get("title","") + " " + d.get("text","")).lower()
@@ -999,8 +1008,8 @@ def main():
     #   2) Min score threshold = 3 (skip score 1-2 PRG mentions)
     #   3) Top-8 cap — rest goes to digest only (prevents 590-msg flood)
     prg_any_alerts.sort(key=lambda x: x[0], reverse=True)   # sort by score desc
-    PRG_ANY_INSTANT_CAP = 8
-    PRG_ANY_MIN_SCORE   = 3
+    PRG_ANY_INSTANT_CAP = 3       # tightened 2026-06-28 per Tom's request
+    PRG_ANY_MIN_SCORE   = 5       # tightened — only quality PRG signals reach instant
     sent_instant = 0
     for score, d, tags in prg_any_alerts:
         if score < PRG_ANY_MIN_SCORE:
@@ -1037,6 +1046,7 @@ def main():
 
     print(f"[✓] Categories — PRG:{len(cat_prg)} MISP/GREY:{len(cat_mispgrey)} "
           f"HOTELS:{len(cat_hotels)} EU:{len(cat_eu)} USA:{len(cat_usa)}")
+    print(f"[🚫] LCC skipped from Telegram: {lcc_skipped_count} (still in JSON for app)")
 
     has_deals = any((cat_prg, cat_mispgrey, cat_hotels, cat_eu, cat_usa))
 

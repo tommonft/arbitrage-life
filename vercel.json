@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/", "destination": "/deal_hunter.html" }
+  ],
   "headers": [
     {
       "source": "/(.*)",
