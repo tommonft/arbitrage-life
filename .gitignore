@@ -1,0 +1,14 @@
+# ── Private working files — NEVER push to the public repo ──────────────────
+# (added 2026-07-08, Fable 5 audit: Ship.command's `git add -A` accidentally
+#  published the whole audit pack incl. personal context; this prevents repeat)
+FABLE5_HANDOFF/
+SESSION_STARTUP.md
+DEV-PROGRESS-LOG.md
+!! 🔴 MASTER_REVIEW.md
+FEEDBACK_FOR_OPUS47.*
+
+# ── Local junk ──────────────────────────────────────────────────────────────
+__pycache__/
+.DS_Store
+scanner.log
+run_output.txt
