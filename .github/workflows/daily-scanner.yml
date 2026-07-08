@@ -2,26 +2,33 @@ name: Arbitrage Life — Deal Scanner
 
 on:
   schedule:
-    # Runs every 2 hours (UTC) — adjust as needed
-    # 06:00, 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00 UTC
-    # = 08:00, 10:00, 12:00, 14:00, 16:00, 18:00, 20:00, 22:00 CEST
-    - cron: '0 */2 * * *'
+    # Every 2 hours at :17 (odd minute avoids GitHub's top-of-the-hour cron
+    # congestion — scheduled runs at :00 are delayed the most).
+    # 00:17, 02:17, ... 22:17 UTC
+    - cron: '17 */2 * * *'
   workflow_dispatch:  # allows manual run from GitHub UI anytime
+
+# Serialize with the watchlist scanner — both commit to main. Without this,
+# simultaneous runs raced on `git push` and the loser silently lost data.
+concurrency:
+  group: repo-commits
+  cancel-in-progress: false
 
 jobs:
   scan:
     runs-on: ubuntu-latest
+    timeout-minutes: 20   # default is 360 — a hung fetch would burn 6h of free minutes
     permissions:
       contents: write   # needed to commit seen_deals.json back
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
@@ -32,10 +39,33 @@ jobs:
           TRAVELPAYOUTS_TOKEN: ${{ secrets.TRAVELPAYOUTS_TOKEN }}
         run: python3 arbitrage_scanner.py
 
-      - name: Save seen deals + latest deals JSON (for HTML on GitHub Pages)
+      - name: Commit deals snapshot
         run: |
           git config user.name "Arbitrage Bot"
           git config user.email "bot@arbitrage-life"
-          git add seen_deals.json latest_deals.json || true
-          git diff --staged --quiet || git commit -m "chore: update deals snapshot [skip ci]"
-          git push || true
+          git add seen_deals.json latest_deals.json
+          if git diff --staged --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git commit -m "chore: update deals snapshot [skip ci]"
+          # Push with rebase-retry — never swallow a failed push silently
+          for i in 1 2 3; do
+            if git push; then exit 0; fi
+            echo "Push failed (attempt $i) — rebasing and retrying"
+            git pull --rebase origin main
+            sleep 5
+          done
+          echo "::error::Failed to push deals snapshot after 3 attempts"
+          exit 1
+
+      - name: Alert on failure (dead-man switch)
+        if: failure()
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\": ${CHAT_ID}, \"text\": \"⚠️ Deal Scanner run FAILED — check GitHub Actions: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            || true

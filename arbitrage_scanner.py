@@ -19,11 +19,12 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.request
 import urllib.parse
 import urllib.error
 import html
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -97,19 +98,22 @@ GREY_ZONE_KEYWORDS = [
 # ── General high-value deal signals ──────────────────────────────────────────
 # ── PRG FLIGHTS DEAL — Tom's 16 preferred carriers ──────────────────────────
 # When ANY of these airlines + Prague keyword appear in a post → instant alert.
+# 2026-07-08 fix (Fable 5 audit): word-boundary matching. The old substring list
+# contained "ba ", "sas ", "af ", "lh ", "ek " which matched inside normal words
+# ("Cuba " → BA, "Kansas " → SAS, "decaf " → AF) and could fire false 🚨 alerts.
 PRG_FLIGHTS_DEAL_AIRLINES = [
-    "air france", "airfrance", "af ",
+    "air france", "airfrance",
     "klm", "k.l.m",
     "delta",                   # already in DELTA_KEYWORDS but kept for explicit detection
-    "scandinavian", "sas ",
+    "scandinavian airlines", "sas",   # word-boundary safe now
     "korean air", "korean",
     "turkish airlines", "turkish",
-    "lufthansa", "lh ",
+    "lufthansa",
     "qantas",
-    "emirates", "ek ",
+    "emirates",
     "etihad",
     "finnair",
-    "british airways", "british airw", "ba ",
+    "british airways", "british airw",
     "china eastern",
     "china southern",
     "china airlines",
@@ -117,14 +121,15 @@ PRG_FLIGHTS_DEAL_AIRLINES = [
 ]
 
 PRG_KEYWORDS_DETECTOR = [
-    "prague", "prg ", " prg", "praha", "czech republic"
+    "prague", "prg", "praha", "czech republic"
 ]
 
 def is_prg_flights_deal(title, text=""):
-    """Return True if any of the 16 carriers + Prague keyword both present."""
+    """Return True if any of the 16 carriers + Prague keyword both present.
+    Word-boundary matching to avoid substring false positives (2026-07-08)."""
     combined = (title + " " + text).lower()
-    has_airline = any(a in combined for a in PRG_FLIGHTS_DEAL_AIRLINES)
-    has_prg     = any(p in combined for p in PRG_KEYWORDS_DETECTOR)
+    has_airline = word_match(combined, PRG_FLIGHTS_DEAL_AIRLINES)
+    has_prg     = word_match(combined, PRG_KEYWORDS_DETECTOR)
     return has_airline and has_prg
 
 # 🇨🇿 PRG ANYTHING — Tom wants INSTANT alert for ANY Prague-related deal
@@ -141,10 +146,36 @@ EU_LCC_NAMES = [
     "volotea", "smartwings", "lauda", "wizzair",
 ]
 
+# IATA codes of EU low-cost carriers — used for structured (Travelpayouts) deals
+# where we get an airline code instead of a name (2026-07-08, Fable 5 audit).
+EU_LCC_CODES = {
+    "W6", "W4", "W9",   # Wizz Air (+ Malta, + UK)
+    "FR", "RK",         # Ryanair (+ UK)
+    "U2", "EC", "DS",   # easyJet (+ Europe, + Switzerland)
+    "VY",               # Vueling
+    "EW",               # Eurowings
+    "LS",               # Jet2
+    "HV", "TO",         # Transavia (+ France)
+    "DY", "D8",         # Norwegian
+    "PC",               # Pegasus
+    "XQ",               # SunExpress
+    "V7",               # Volotea
+    "I2",               # Iberia Express
+    "QS",               # Smartwings
+}
+
 def is_eu_lcc(title, text=""):
     """True if title mentions any EU low-cost carrier."""
     combined = (title + " " + text).lower()
     return any(kw in combined for kw in EU_LCC_NAMES)
+
+def is_lcc_deal(deal):
+    """LCC detection for a deal dict: airline IATA code (structured sources like
+    Travelpayouts v3) OR carrier name in title/text (RSS sources)."""
+    code = (deal.get("airline") or "").strip().upper()
+    if code in EU_LCC_CODES:
+        return True
+    return is_eu_lcc(deal.get("title", ""), deal.get("text", ""))
 
 def is_prg_anything(title, text=""):
     """True if ANY Prague reference appears in title/text — EXCLUDING EU LCC dealy.
@@ -209,20 +240,22 @@ SKIP_KEYWORDS = [
 
 # ── Sources ──────────────────────────────────────────────────────────────────
 SOURCES = [
+    # Reddit: .json endpoint is 403-blocked for CI IPs; .rss (Atom) works.
+    # Switched 2026-07-08 (Fable 5 audit) — same pattern as arbitrage_weekly_digest.py.
     {
         "name": "r/flightdeals",
-        "url": "https://www.reddit.com/r/flightdeals/new.json?limit=30&sort=new",
-        "type": "reddit_json",
+        "url": "https://www.reddit.com/r/flightdeals/new/.rss?limit=30",
+        "type": "reddit_rss",
     },
     {
         "name": "r/awardtravel",
-        "url": "https://www.reddit.com/r/awardtravel/new.json?limit=20&sort=new",
-        "type": "reddit_json",
+        "url": "https://www.reddit.com/r/awardtravel/new/.rss?limit=20",
+        "type": "reddit_rss",
     },
     {
         "name": "r/churning",
-        "url": "https://www.reddit.com/r/churning/new.json?limit=15&sort=new",
-        "type": "reddit_json",
+        "url": "https://www.reddit.com/r/churning/new/.rss?limit=15",
+        "type": "reddit_rss",
     },
     {
         "name": "SecretFlying Europe",
@@ -261,9 +294,9 @@ SOURCES = [
         "type": "rss",
     },
     {
-        "name": "r/solotravel deals",
-        "url": "https://www.reddit.com/r/Flights/new.json?limit=15&sort=new",
-        "type": "reddit_json",
+        "name": "r/Flights",
+        "url": "https://www.reddit.com/r/Flights/new/.rss?limit=15",
+        "type": "reddit_rss",
     },
     # ── HIGH-VOLUME RELIABLE RSS BLOGS (added 2026-06-14) ───────────────────
     # These were tested and produce 80%+ of the deal volume in the old DB.
@@ -435,12 +468,12 @@ def score_deal(title, text=""):
         score += 1
 
     # 🚨 PRG FLIGHTS DEAL — Tom's top priority: 16 carriers + Prague combo
-    if is_prg_flights_deal(text=text, title="") or is_prg_flights_deal(title=title, text=text):
+    if is_prg_flights_deal(title=title, text=text):
         score += 6        # massive boost so it lands at top of digest
         tags.append("PRG_FLIGHTS_DEAL")
-        # Also add identified carrier as a tag for filtering
+        # Also add identified carrier as a tag for filtering (word-boundary safe)
         for a in PRG_FLIGHTS_DEAL_AIRLINES:
-            if a.strip() and a in combined:
+            if a.strip() and word_match(combined, [a]):
                 # canonical airline label
                 label = a.strip().upper().replace(".", "")
                 tags.append(f"AIRLINE_{label}")
@@ -541,28 +574,39 @@ HEADERS = {
     )
 }
 
+ATOM_NS = "{http://www.w3.org/2005/Atom}"
+
 def fetch_reddit(source):
+    """Fetch a subreddit via the Atom .rss endpoint (the .json endpoint returns
+    HTTP 403 for GitHub Actions runner IPs — observed continuously since 06/2026).
+    One retry with a polite pause; same approach as arbitrage_weekly_digest.py."""
     deals = []
-    req = urllib.request.Request(source["url"], headers=HEADERS)
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode())
-        posts = data.get("data", {}).get("children", [])
-        for post in posts:
-            p = post.get("data", {})
-            deal_id = p.get("id", "")
-            title   = p.get("title", "")
-            url     = "https://reddit.com" + p.get("permalink", "")
-            text    = p.get("selftext", "")[:600]
-            deals.append({
-                "id":     f"reddit_{deal_id}",
-                "title":  title,
-                "url":    url,
-                "text":   text,
-                "source": source["name"],
-            })
-    except Exception as e:
-        print(f"[!] Failed to fetch {source['name']}: {e}")
+    for attempt in range(2):
+        try:
+            req = urllib.request.Request(source["url"], headers=HEADERS)
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                raw = resp.read()
+            root = ET.fromstring(raw)
+            for e in root.findall(f"{ATOM_NS}entry"):
+                title   = html.unescape((e.findtext(f"{ATOM_NS}title") or "").strip())
+                link_el = e.find(f"{ATOM_NS}link")
+                url     = link_el.get("href") if link_el is not None else ""
+                entry_id = (e.findtext(f"{ATOM_NS}id") or "").strip()  # e.g. t3_1abcde
+                content = re.sub(r'<[^>]+>', ' ', e.findtext(f"{ATOM_NS}content") or "")
+                text    = html.unescape(content)[:600]
+                rid     = entry_id.replace("t3_", "") or (url.rstrip("/").split("/")[-2] if url else title[:40])
+                deals.append({
+                    "id":     f"reddit_{rid}",
+                    "title":  title,
+                    "url":    url,
+                    "text":   text,
+                    "source": source["name"],
+                })
+            break
+        except Exception as e:
+            print(f"[!] Failed to fetch {source['name']} (attempt {attempt+1}): {e}")
+            if attempt == 0:
+                time.sleep(5)
     return deals
 
 def clean_xml(content_bytes):
@@ -607,66 +651,150 @@ def fetch_rss(source):
         print(f"[!] Failed to fetch RSS {source['name']}: {e}")
     return deals
 
+def _tp_make_deal(origin_c, dest_c, value, depart, ret, airline, link=""):
+    """Build one deal dict from Travelpayouts fields (shared by v3/v2 parsers).
+    NO FAKE DATA: airline stays '' when the API doesn't provide it."""
+    trip_type = "RT" if ret else "OW"
+    price_str = f"€{value}"
+    airline   = (airline or "").strip().upper()
+    airline_part = f"{airline}, " if airline else ""
+    title     = f"{origin_c} → {dest_c} — {price_str} {trip_type} ({airline_part}{depart}{' to ' + ret if ret else ''})"
+    deal_id   = f"tp_{origin_c}_{dest_c}_{depart}_{ret}_{value}"
+    if link:
+        url = "https://www.aviasales.com" + link if link.startswith("/") else link
+    else:
+        dep_short = depart.replace("-", "")[2:] if depart else ""
+        ret_short = ret.replace("-", "")[2:] if ret else ""
+        url = (f"https://www.skyscanner.com/transport/flights/{origin_c.lower()}/{dest_c.lower()}/{dep_short}/{ret_short}/"
+               if dep_short else
+               f"https://www.skyscanner.com/transport/flights/{origin_c.lower()}/{dest_c.lower()}/")
+    text_airline = airline if airline else "?"
+    return {
+        "id":      deal_id,
+        "title":   title,
+        "url":     url,
+        "text":    f"Price: {price_str} · Airline: {text_airline} · Depart: {depart} · Return: {ret}",
+        "source":  "Travelpayouts",
+        "airline": airline,          # IATA code (v3) or "" (v2) — used by LCC filter + UI
+        "price":   value,
+        "currency": "€",
+        "dates":   f"{depart}{' → ' + ret if ret else ''}",
+    }
+
+def parse_tp_v3(payload, origin):
+    """Parse /aviasales/v3/prices_for_dates response.
+    v3 items include the airline IATA code — that's the whole point of using v3."""
+    deals = []
+    for item in payload.get("data", []):
+        deals.append(_tp_make_deal(
+            origin_c=item.get("origin", origin),
+            dest_c=item.get("destination", "?"),
+            value=item.get("value", item.get("price", 0)),
+            depart=(item.get("depart_date") or item.get("departure_at") or "")[:10],
+            ret=(item.get("return_date") or item.get("return_at") or "")[:10],
+            airline=item.get("airline", ""),
+            link=item.get("link", ""),
+        ))
+    return deals
+
+def parse_tp_v2(payload, origin):
+    """Parse legacy /v2/prices/latest response (no airline field)."""
+    deals = []
+    for item in payload.get("data", []):
+        deals.append(_tp_make_deal(
+            origin_c=item.get("origin", origin),
+            dest_c=item.get("destination", "?"),
+            value=item.get("value", 0),
+            depart=item.get("depart_date", ""),
+            ret=item.get("return_date", ""),
+            airline=item.get("airline", ""),   # v2 does not return this → ""
+        ))
+    return deals
+
+def _tp_get(url):
+    req = urllib.request.Request(url, headers=HEADERS)
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        return json.loads(resp.read().decode())
+
 def fetch_travelpayouts():
-    """Query Travelpayouts v2 latest-prices API for top routes from PRG/VIE/BUD.
-    Returns list of pseudo-RSS items so they merge into all_deals naturally.
+    """Query Travelpayouts for top routes from PRG/VIE/BUD.
+
+    2026-07-08 (Fable 5 audit): switched primary endpoint to
+    /aviasales/v3/prices_for_dates — unlike v2/prices/latest it returns the
+    airline IATA code, which makes the LCC filter work for 60 % of the feed
+    (v2 left `airline` empty → €32 Wizz fares slipped into instant PRG alerts).
+    Queries the next 3 months per origin (v3 needs a departure period).
+    Falls back to the old v2 endpoint if v3 errors or returns nothing.
+    Rate limits: v3 = 600 req/min, we send 9 → fine.
     Requires TRAVELPAYOUTS_TOKEN env var (free signup at travelpayouts.com)."""
     token = os.environ.get("TRAVELPAYOUTS_TOKEN", "").strip()
     if not token:
         print("[!] TRAVELPAYOUTS_TOKEN not set — skipping Travelpayouts API")
         return []
+    # Next 3 months as YYYY-MM (v3 accepts a whole month as departure_at)
+    today = date.today()
+    months = []
+    y, m = today.year, today.month
+    for _ in range(3):
+        months.append(f"{y:04d}-{m:02d}")
+        m += 1
+        if m > 12:
+            m, y = 1, y + 1
     deals = []
-    # Query 3 home origins
     for origin in ("PRG", "VIE", "BUD"):
-        params = {
-            "origin":   origin,
-            "currency": "eur",
-            "limit":    100,
-            "page":     1,
-            "sorting":  "price",
-            "token":    token,
-        }
-        url = "https://api.travelpayouts.com/v2/prices/latest?" + urllib.parse.urlencode(params)
-        try:
-            req = urllib.request.Request(url, headers=HEADERS)
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                payload = json.loads(resp.read().decode())
-            if not payload.get("success"):
-                continue
-            for item in payload.get("data", []):
-                origin_c   = item.get("origin", origin)
-                dest_c     = item.get("destination", "?")
-                value      = item.get("value", 0)
-                depart     = item.get("depart_date", "")
-                ret        = item.get("return_date", "")
-                airline    = item.get("airline", "")
-                trip_type  = "RT" if ret else "OW"
-                price_str  = f"€{value}"
-                title      = f"{origin_c} → {dest_c} — {price_str} {trip_type} ({airline}, {depart}{' to ' + ret if ret else ''})"
-                deal_id    = f"tp_{origin_c}_{dest_c}_{depart}_{ret}_{value}"
-                # Skyscanner deeplink with dates
-                dep_short  = depart.replace("-","")[2:] if depart else ""
-                ret_short  = ret.replace("-","")[2:] if ret else ""
-                sky_url    = f"https://www.skyscanner.com/transport/flights/{origin_c.lower()}/{dest_c.lower()}/{dep_short}/{ret_short}/" if dep_short else f"https://www.skyscanner.com/transport/flights/{origin_c.lower()}/{dest_c.lower()}/"
-                deals.append({
-                    "id":     deal_id,
-                    "title":  title,
-                    "url":    sky_url,
-                    "text":   f"Price: {price_str} · Airline: {airline} · Depart: {depart} · Return: {ret}",
-                    "source": "Travelpayouts",
-                })
-            print(f"[✓] Travelpayouts {origin}: {len(payload.get('data',[]))} routes")
-        except urllib.error.HTTPError as e:
-            print(f"[!] Travelpayouts {origin}: HTTP {e.code}")
-        except Exception as e:
-            print(f"[!] Travelpayouts {origin}: {e}")
+        got = []
+        # Primary: v3 prices_for_dates (includes airline code + aviasales link)
+        for month in months:
+            try:
+                params = {
+                    "origin":       origin,
+                    "departure_at": month,
+                    "currency":     "eur",
+                    "limit":        35,
+                    "page":         1,
+                    "sorting":      "price",
+                    "one_way":      "false",
+                    "token":        token,
+                }
+                url = ("https://api.travelpayouts.com/aviasales/v3/prices_for_dates?"
+                       + urllib.parse.urlencode(params))
+                payload = _tp_get(url)
+                if payload.get("success"):
+                    got.extend(parse_tp_v3(payload, origin))
+            except Exception as e:
+                print(f"[!] Travelpayouts v3 {origin} {month}: {e}")
+        if got:
+            print(f"[✓] Travelpayouts v3 {origin}: {len(got)} routes ({len(months)} months)")
+        # Fallback: v2 (no airline, but better than nothing)
+        if not got:
+            try:
+                params = {
+                    "origin":   origin,
+                    "currency": "eur",
+                    "limit":    100,
+                    "page":     1,
+                    "sorting":  "price",
+                    "token":    token,
+                }
+                url = ("https://api.travelpayouts.com/v2/prices/latest?"
+                       + urllib.parse.urlencode(params))
+                payload = _tp_get(url)
+                if payload.get("success"):
+                    got = parse_tp_v2(payload, origin)
+                    print(f"[✓] Travelpayouts v2 fallback {origin}: {len(got)} routes")
+            except urllib.error.HTTPError as e:
+                print(f"[!] Travelpayouts v2 {origin}: HTTP {e.code}")
+            except Exception as e:
+                print(f"[!] Travelpayouts v2 {origin}: {e}")
+        deals.extend(got)
     return deals
 
 def fetch_all():
     all_deals = []
     for source in SOURCES:
-        if source["type"] == "reddit_json":
+        if source["type"] in ("reddit_rss", "reddit_json"):
             all_deals.extend(fetch_reddit(source))
+            time.sleep(3)   # polite gap between Reddit feeds (dodge 429)
         elif source["type"] == "rss":
             all_deals.extend(fetch_rss(source))
     # Travelpayouts API (separate from RSS/Reddit, runs only if token set)
@@ -675,21 +803,38 @@ def fetch_all():
     return all_deals
 
 # ── Load/save seen deals ──────────────────────────────────────────────────────
+# 2026-07-08 (Fable 5 audit): seen is now a dict {deal_id: last_seen_iso}.
+# The old format was a JSON list capped via list(set)[-600:], which evicted
+# RANDOM ids (set order is undefined) — and one scan produces ~500 ids, so
+# still-live deals kept falling out and re-triggered Telegram alerts.
+# Now: eviction by age (not seen for >21 days) + hard cap on newest 5000.
+SEEN_MAX_AGE_DAYS = 21
+SEEN_HARD_CAP     = 5000
+
 def load_seen():
+    """Return dict {deal_id: last_seen_iso}. Accepts legacy list format."""
     if SEEN_FILE.exists():
         try:
             with open(SEEN_FILE) as f:
                 data = json.load(f)
-                if len(data) > 600:
-                    data = data[-600:]
-                return set(data)
+            if isinstance(data, list):          # legacy format → migrate
+                now_iso = datetime.now().isoformat()
+                return {deal_id: now_iso for deal_id in data}
+            if isinstance(data, dict):
+                return data
         except Exception:
-            return set()
-    return set()
+            return {}
+    return {}
 
-def save_seen(seen_set):
+def save_seen(seen):
+    """Evict entries not seen for SEEN_MAX_AGE_DAYS, keep newest SEEN_HARD_CAP."""
+    cutoff = (datetime.now() - timedelta(days=SEEN_MAX_AGE_DAYS)).isoformat()
+    fresh = {k: v for k, v in seen.items() if v >= cutoff}
+    if len(fresh) > SEEN_HARD_CAP:
+        newest = sorted(fresh.items(), key=lambda kv: kv[1], reverse=True)[:SEEN_HARD_CAP]
+        fresh = dict(newest)
     with open(SEEN_FILE, "w") as f:
-        json.dump(list(seen_set)[-600:], f)
+        json.dump(fresh, f)
 
 # ── Save latest deals to JSON for the static HTML to read ────────────────────
 # (Phase 1 architecture: scanner → JSON → GitHub Pages → HTML on mobile.
@@ -740,8 +885,15 @@ def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned, json_deal
         try:
             with open(LATEST_FILE) as f:
                 existing = json.load(f)
-        except Exception:
-            existing = []
+            if not isinstance(existing, list):
+                existing = []
+        except Exception as e:
+            # DATA-LOSS GUARD (2026-07-08, Fable 5 audit): a corrupt file used to
+            # silently become existing=[] → the whole 500-deal pool got wiped by
+            # a single bad scan. Now we refuse to overwrite and keep the old file.
+            print(f"[✗] latest_deals.json is unreadable ({e}) — REFUSING to overwrite. "
+                  f"Fix or delete the file manually.")
+            return
 
     now_iso = datetime.now().isoformat()
 
@@ -750,14 +902,20 @@ def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned, json_deal
         text  = d.get("text", "") or ""
         is_hotel = any(t.upper() in ("HOTEL",) for t in tags) or \
                    any(k in title.lower() for k in ("hotel", "resort", "stay", "/night"))
-        # Try to pull a price from the title — best-effort, no fakes.
+        # Price/currency: prefer structured fields (Travelpayouts v3),
+        # else best-effort parse from the title — no fakes, 0 means "unknown".
         price = 0
         currency = ""
-        m = re.search(r"(€|\$|EUR|USD|CZK)\s*([0-9][0-9,]{0,7})", title)
-        if m:
-            currency = m.group(1).replace("EUR", "€").replace("USD", "$")
-            try: price = int(m.group(2).replace(",", ""))
+        if d.get("price"):
+            try: price = int(d["price"])
             except Exception: price = 0
+            currency = d.get("currency", "")
+        if not price:
+            m = re.search(r"(€|\$|EUR|USD|CZK)\s*([0-9][0-9,]{0,7})", title)
+            if m:
+                currency = m.group(1).replace("EUR", "€").replace("USD", "$")
+                try: price = int(m.group(2).replace(",", ""))
+                except Exception: price = 0
         return {
             "id":       d.get("id", ""),
             "route":    title[:160],
@@ -768,12 +926,13 @@ def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned, json_deal
             "tags":     tags,
             "price":    price,
             "currency": currency,
-            "savings":  0,        # not parsed from scanner; HTML shows 0%
-            "airline":  "",       # unknown from scanner text
-            "dates":    "",       # unknown from scanner text
+            "savings":  0,        # not computed — the UI hides 0 (no fake "0% below avg")
+            "airline":  d.get("airline", ""),   # IATA code from TP v3, "" elsewhere
+            "dates":    d.get("dates", ""),
             "grey_zone": ("GreyZone" in tags or "FuelDump" in tags),
             "approved": False,
             "created_at": now_iso,
+            "last_seen":  now_iso,
             "text":     text[:200],
         }
 
@@ -781,13 +940,19 @@ def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned, json_deal
     source_items = json_deals if json_deals else (hot_deals + warm_deals + grey_deals)
     new_items = [to_dict(s, d, t) for (s, d, t) in source_items]
 
-    # Merge with existing — newest wins on duplicates, keep top 500 newest.
+    # Merge with existing. FIRST-SEEN FIX (2026-07-08): keep the original
+    # created_at of an already-known deal, so age badges in the app reflect how
+    # long a deal has been around (previously every rescan reset it to "now"
+    # and everything showed 🆕 NEW forever). last_seen tracks feed liveness.
     by_id = {x.get("id"): x for x in existing}
     for x in new_items:
+        prev = by_id.get(x["id"])
+        if prev and prev.get("created_at"):
+            x["created_at"] = prev["created_at"]
         by_id[x["id"]] = x
     combined = sorted(
         by_id.values(),
-        key=lambda x: x.get("created_at", ""),
+        key=lambda x: x.get("last_seen") or x.get("created_at", ""),
         reverse=True,
     )[:500]
 
@@ -800,32 +965,84 @@ def save_latest_json(hot_deals, warm_deals, grey_deals, total_scanned, json_deal
     print(f"[✓] latest_deals.json saved — {len(combined)} deals, {len(new_items)} from this scan, {total_scanned} sources scanned")
 
 # ── Send Telegram ─────────────────────────────────────────────────────────────
-def send_telegram(text):
+# 2026-07-08 (Fable 5 audit): switched parse_mode Markdown → HTML.
+# Legacy Markdown has no escaping mechanism: a single "_" or ")" in a scraped
+# title made the API return 400 "can't parse entities" and the WHOLE digest was
+# silently lost. HTML mode + html.escape() on every dynamic string is the
+# 2026 best practice (core.telegram.org/bots/api#formatting-options).
+# Also added: ≥1.1 s spacing between messages (Telegram limit ~1 msg/s per chat)
+# and one retry honoring retry_after on HTTP 429.
+
+def esc(s):
+    """Escape dynamic text for Telegram HTML parse mode."""
+    return html.escape(str(s or ""), quote=False)
+
+def esc_url(u):
+    """Escape a URL for use inside href=\"...\"."""
+    return html.escape(str(u or ""), quote=True)
+
+_LAST_TG_SEND = [0.0]   # module-level, list so it's mutable in function scope
+
+def _tg_post(payload_dict, timeout=15):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+    payload = json.dumps(payload_dict).encode("utf-8")
+    req = urllib.request.Request(url, data=payload,
+                                 headers={"Content-Type": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return json.loads(resp.read().decode())
+
+def send_telegram(text):
+    if not BOT_TOKEN or not CHAT_ID:
+        print("[!] BOT_TOKEN/CHAT_ID missing — Telegram send skipped")
+        return False
+    # Truncate safely at a line boundary (never mid-tag)
     if len(text) > 4000:
-        text = text[:4000] + "\n\n_...zkráceno_"
-    payload = json.dumps({
+        cut = text[:3900]
+        nl = cut.rfind("\n")
+        if nl > 2000:
+            cut = cut[:nl]
+        text = cut + "\n\n<i>… zkráceno</i>"
+    payload = {
         "chat_id":    CHAT_ID,
         "text":       text,
-        "parse_mode": "Markdown",
+        "parse_mode": "HTML",
         "disable_web_page_preview": True,
-    }).encode("utf-8")
-    req = urllib.request.Request(
-        url, data=payload,
-        headers={"Content-Type": "application/json"}
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode())
+    }
+    # Enforce ~1 msg/s per chat
+    wait = 1.1 - (time.time() - _LAST_TG_SEND[0])
+    if wait > 0:
+        time.sleep(wait)
+    for attempt in range(2):
+        try:
+            result = _tg_post(payload)
+            _LAST_TG_SEND[0] = time.time()
             if result.get("ok"):
                 print("[✓] Telegram message sent")
                 return True
-            else:
-                print(f"[✗] Telegram error: {result}")
-                return False
-    except Exception as e:
-        print(f"[✗] Telegram failed: {e}")
-        return False
+            if result.get("error_code") == 429 and attempt == 0:
+                retry_after = (result.get("parameters") or {}).get("retry_after", 3)
+                print(f"[!] Telegram 429 — waiting {retry_after}s and retrying")
+                time.sleep(min(int(retry_after) + 1, 60))
+                continue
+            print(f"[✗] Telegram error: {result}")
+            return False
+        except urllib.error.HTTPError as e:
+            _LAST_TG_SEND[0] = time.time()
+            if e.code == 429 and attempt == 0:
+                try:
+                    body = json.loads(e.read().decode())
+                    retry_after = (body.get("parameters") or {}).get("retry_after", 3)
+                except Exception:
+                    retry_after = 3
+                print(f"[!] Telegram 429 — waiting {retry_after}s and retrying")
+                time.sleep(min(int(retry_after) + 1, 60))
+                continue
+            print(f"[✗] Telegram failed: HTTP {e.code}")
+            return False
+        except Exception as e:
+            print(f"[✗] Telegram failed: {e}")
+            return False
+    return False
 
 # ── Format digest ─────────────────────────────────────────────────────────────
 def tag_emoji(tags):
@@ -844,70 +1061,85 @@ def tag_emoji(tags):
     }
     return " ".join(mapping.get(t, "") for t in tags if t in mapping)
 
+def build_category_message(header, deals, today_str, limit=8):
+    """Build a per-category digest in Telegram HTML format (separated from
+    sending so smoke tests can verify escaping without network)."""
+    lines = [f"{header} — <i>{esc(today_str)}</i>\n"]
+    for score, d, tags in deals[:limit]:
+        title  = esc(d.get("title", "")[:90])
+        url    = esc_url(d.get("url", ""))
+        source = esc(d.get("source", "?"))
+        emojis = tag_emoji(tags)
+        lines.append(f'• {emojis} <a href="{url}">{title}</a>')
+        lines.append(f"  <i>{source} · score {score}</i>\n")
+    if len(deals) > limit:
+        lines.append(f"<i>+ {len(deals) - limit} more in the app</i>")
+    return "\n".join(lines)
+
 def send_category_message(header, deals, today_str, limit=8):
     """Send a per-category Telegram digest. Skip silently if no deals.
-    `deals` is list of (score, deal_dict, tags) tuples sorted by score desc."""
+    `deals` is list of (score, deal_dict, tags) tuples sorted by score desc.
+    NOTE: `header` may contain HTML tags (<b>…</b>) — don't escape it."""
     if not deals:
         return
-    lines = [f"{header} — _{today_str}_\n"]
-    for score, d, tags in deals[:limit]:
-        title  = d.get("title","")[:90].replace("*","").replace("[","").replace("]","")
-        url    = d.get("url","")
-        source = d.get("source","?")
-        emojis = tag_emoji(tags)
-        lines.append(f"• {emojis} [{title}]({url})")
-        lines.append(f"  _{source} · score {score}_\n")
-    if len(deals) > limit:
-        lines.append(f"_+ {len(deals) - limit} more in the app_")
-    send_telegram("\n".join(lines))
+    send_telegram(build_category_message(header, deals, today_str, limit))
     print(f"[📨] Sent category: {header[:40]} ({len(deals)} deals)")
 
-def format_daily_digest(hot_deals, warm_deals, grey_deals, today_str, total_scanned):
-    lines = [f"💰 *ARBITRAGE LIFE — {today_str}*\n"]
+# NOTE (2026-07-08, Fable 5 audit): format_daily_digest() was removed here.
+# It was dead code (never called since the 5-category digest replaced it) and
+# used legacy Markdown formatting that the new HTML-mode send_telegram() would
+# render literally. Recover from git history if ever needed.
 
-    if not hot_deals and not warm_deals and not grey_deals:
-        lines.append("😴 Dnes žádné relevantní dealy. Systém hlídá dál.")
-        lines.append(f"_Zkontrolováno {total_scanned} příspěvků_")
-        return "\n".join(lines)
+# ── Weekly LCC roundup ────────────────────────────────────────────────────────
+# Tom's rule (2026-07-08): EU low-cost deals NEVER appear in daily Telegram —
+# instead ONE Sunday-morning message with the top 5-7 LCC fares from home
+# airports. Fires only in the Sunday run that starts between 05:00-08:59 UTC
+# (the 06:17 UTC scheduled run; window is wide because GitHub cron drifts).
+LCC_WEEKLY_LIMIT = 7
 
-    # 🚨 JACKPOT alert — AF/KLM/Delta + PRG/VIE/BUD
-    jackpot = [(s, d, t) for s, d, t in hot_deals if "🎯JACKPOT" in t]
-    if jackpot:
-        lines.append("🚨🚨 *JACKPOT — AF/KLM/DELTA z PRG/VIE/BUD* 🚨🚨")
-        for score, d, tags in jackpot[:3]:
-            title = d["title"][:90].replace("*","").replace("[","").replace("]","")
-            lines.append(f"➤ [{title}]({d['url']})")
-            lines.append(f"  _{d['source']} | score: {score}_\n")
-        lines.append("---")
-
-    if hot_deals:
-        lines.append(f"🔥 *FIRE DEALS ({len(hot_deals)})*")
-        for score, d, tags in hot_deals[:6]:
-            title  = d["title"][:85].replace("*","").replace("[","").replace("]","")
-            emojis = tag_emoji(tags)
-            lines.append(f"• {emojis} [{title}]({d['url']})")
-            lines.append(f"  _{d['source']}_\n")
-
-    if grey_deals:
-        lines.append(f"\n⛽ *GREY ZONE — Fuel dump / Hidden city ({len(grey_deals)})*")
-        for score, d, tags in grey_deals[:4]:
-            title  = d["title"][:80].replace("*","").replace("[","").replace("]","")
-            emojis = tag_emoji(tags)
-            lines.append(f"• {emojis} [{title}]({d['url']})")
-            lines.append(f"  _{d['source']}_\n")
-
-    if warm_deals:
-        lines.append(f"\n🟡 *ZAJÍMAVÉ ({len(warm_deals)})*")
-        for score, d, tags in warm_deals[:5]:
-            title  = d["title"][:70].replace("*","").replace("[","").replace("]","")
-            emojis = tag_emoji(tags)
-            lines.append(f"• {emojis} [{title}]({d['url']}) — _{d['source']}_")
-
-    lines.append(
-        f"\n_Skenováno: {datetime.now().strftime('%H:%M')} | "
-        f"{total_scanned} příspěvků | PRG/VIE focus_"
-    )
+def build_lcc_weekly_message(all_deals, today_str, limit=LCC_WEEKLY_LIMIT):
+    """Pick top LCC fares from home airports out of ALL current deals.
+    Returns None when there is nothing to send (no fake 'empty' messages)."""
+    pool = []
+    seen_routes = set()
+    for d in all_deals:
+        if not is_lcc_deal(d):
+            continue
+        score, tags = score_deal(d.get("title", ""), d.get("text", ""))
+        if "PRG/VIE/BUD" not in tags and "PRG_ANY" not in tags:
+            continue   # only fares relevant to Tom's home airports
+        # de-duplicate by route (origin→dest), keep the cheapest/first
+        route_key = re.sub(r"—.*$", "", d.get("title", "")).strip()[:30]
+        if route_key in seen_routes:
+            continue
+        seen_routes.add(route_key)
+        price = d.get("price") or 0
+        pool.append((price if price > 0 else 10**9, score, d))
+    if not pool:
+        return None
+    pool.sort(key=lambda x: (x[0], -x[1]))   # cheapest first, then score
+    lines = [f"🟠 <b>LOWCOST TÝDNE — top {min(limit, len(pool))}</b> — <i>{esc(today_str)}</i>",
+             "<i>Wizz/Ryanair/easyJet a spol. z PRG/VIE/BUD. Jednou týdně, ať tě to nezahlcuje.</i>\n"]
+    for price_key, score, d in pool[:limit]:
+        title = esc(d.get("title", "")[:90])
+        url = esc_url(d.get("url", ""))
+        lines.append(f'• <a href="{url}">{title}</a>')
+    lines.append("\n<i>Zbytek lowcostů najdeš v appce (vypni pill 🚫 LowCost).</i>")
     return "\n".join(lines)
+
+def send_weekly_lcc_roundup(all_deals, today_str):
+    now = datetime.utcnow()
+    if now.weekday() != 6:          # Sunday only
+        return False
+    if not (5 <= now.hour < 9):     # the ~06:17 UTC run (cron drift tolerant)
+        return False
+    msg = build_lcc_weekly_message(all_deals, today_str)
+    if not msg:
+        print("[🟠] Weekly LCC roundup: nothing to send")
+        return False
+    send_telegram(msg)
+    print("[🟠] Weekly LCC roundup sent")
+    return True
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
@@ -940,6 +1172,8 @@ def main():
     # GLOBAL LCC EXCLUSION (Tom 2026-06-28): EU low-cost carriers do NOT enter
     # ANY Telegram category. They still go to JSON (for the app), but Telegram
     # noise is the user-facing problem — Ryanair/Wizz/EasyJet PRG→EU is rutina.
+    # 2026-07-08 (Tom's request): instead they accumulate into ONE weekly
+    # roundup message (top 5-7, Sunday morning) — see send_weekly_lcc_roundup().
     lcc_skipped_count = 0
     for d in new_deals:
         score, tags = score_deal(d["title"], d.get("text", ""))
@@ -947,7 +1181,10 @@ def main():
             continue   # PRG_ANY items bypass the score floor (Tom wants ALL Prague)
 
         # ─── GLOBAL EU LCC SKIP — applies to ALL Telegram routing ───────
-        if is_eu_lcc(d.get("title", ""), d.get("text", "")):
+        # 2026-07-08: is_lcc_deal() also checks the airline IATA code, so
+        # structured Travelpayouts deals (W6/FR/U2…) are finally caught too —
+        # previously €32 Wizz fares had no airline name and slipped through.
+        if is_lcc_deal(d):
             lcc_skipped_count += 1
             continue   # LCC stays in JSON via json_deals loop below; just not Telegram
 
@@ -989,17 +1226,17 @@ def main():
     # Send instant 🚨🚨🚨 alerts for any PRG flights deals found this scan
     for score, d, tags in prg_flights_alerts:
         airline = next((t.replace("AIRLINE_", "") for t in tags if t.startswith("AIRLINE_")), "?")
-        title = d.get("title", "")[:200].replace("*", "").replace("[", "").replace("]", "")
-        url = d.get("url", "")
+        title = esc(d.get("title", "")[:200])
+        url = esc_url(d.get("url", ""))
         msg = (
-            f"🚨🚨🚨 *PRG FLIGHTS DEAL* 🚨🚨🚨\n\n"
-            f"*Airline:* {airline}\n"
-            f"*Deal:* {title}\n\n"
-            f"[Open source link]({url})\n\n"
-            f"_Score: {score} · Source: {d.get('source','?')}_"
+            f"🚨🚨🚨 <b>PRG FLIGHTS DEAL</b> 🚨🚨🚨\n\n"
+            f"<b>Airline:</b> {esc(airline)}\n"
+            f"<b>Deal:</b> {title}\n\n"
+            f'<a href="{url}">Open source link</a>\n\n'
+            f"<i>Score: {score} · Source: {esc(d.get('source','?'))}</i>"
         )
         send_telegram(msg)
-        print(f"[🚨] PRG FLIGHTS DEAL alert sent: {airline} — {title[:60]}")
+        print(f"[🚨] PRG FLIGHTS DEAL alert sent: {airline} — {d.get('title','')[:60]}")
 
     # 🇨🇿 PRG ANYTHING — INSTANT alerts (limited to top 8 per scan by score)
     # Wider net than PRG_FLIGHTS_DEAL — Tom wants quality PRG signals only.
@@ -1016,16 +1253,16 @@ def main():
             break   # rest is sorted by score so we can stop
         if sent_instant >= PRG_ANY_INSTANT_CAP:
             break
-        title = d.get("title", "")[:200].replace("*", "").replace("[", "").replace("]", "")
-        url = d.get("url", "")
+        title = esc(d.get("title", "")[:200])
+        url = esc_url(d.get("url", ""))
         msg = (
-            f"🇨🇿 *PRG ANYTHING* 🇨🇿\n\n"
-            f"*Deal:* {title}\n\n"
-            f"[Open source link]({url})\n\n"
-            f"_Score: {score} · Source: {d.get('source','?')}_"
+            f"🇨🇿 <b>PRG ANYTHING</b> 🇨🇿\n\n"
+            f"<b>Deal:</b> {title}\n\n"
+            f'<a href="{url}">Open source link</a>\n\n'
+            f"<i>Score: {score} · Source: {esc(d.get('source','?'))}</i>"
         )
         send_telegram(msg)
-        print(f"[🇨🇿] PRG ANY alert sent: {title[:60]}")
+        print(f"[🇨🇿] PRG ANY alert sent: {d.get('title','')[:60]}")
         sent_instant += 1
     skipped = max(0, len(prg_any_alerts) - sent_instant)
     if skipped:
@@ -1052,23 +1289,30 @@ def main():
 
     if has_deals or "--force" in sys.argv:
         # SEND CATEGORIZED MESSAGES (Tom can mute each independently)
-        send_category_message("🇨🇿 *PRG / VIE / BUD DEALS*",   cat_prg,      today_str, 8)
-        send_category_message("💥 *MISPRICE + GREY ZONE*",      cat_mispgrey, today_str, 6)
-        send_category_message("🏨 *HOTEL DEALS*",               cat_hotels,   today_str, 5)
-        send_category_message("🌍 *EU DEALS*",                  cat_eu,       today_str, 6)
-        send_category_message("🇺🇸 *USA → WORLD*",             cat_usa,      today_str, 5)
+        send_category_message("🇨🇿 <b>PRG / VIE / BUD DEALS</b>",   cat_prg,      today_str, 8)
+        send_category_message("💥 <b>MISPRICE + GREY ZONE</b>",      cat_mispgrey, today_str, 6)
+        send_category_message("🏨 <b>HOTEL DEALS</b>",               cat_hotels,   today_str, 5)
+        send_category_message("🌍 <b>EU DEALS</b>",                  cat_eu,       today_str, 6)
+        send_category_message("🇺🇸 <b>USA → WORLD</b>",             cat_usa,      today_str, 5)
     else:
         # Send brief "nothing today" every 3rd day
         day_of_year = date.today().timetuple().tm_yday
         if day_of_year % 3 == 0 or "--test" in sys.argv:
             send_telegram(
-                f"💰 *ARBITRAGE LIFE — {today_str}*\n\n"
+                f"💰 <b>ARBITRAGE LIFE — {esc(today_str)}</b>\n\n"
                 "😴 Dnes žádné relevantní dealy. Systém hlídá dál.\n"
-                f"_Zkontrolováno {len(all_deals)} příspěvků_"
+                f"<i>Zkontrolováno {len(all_deals)} příspěvků</i>"
             )
 
-    # Update seen IDs
-    seen.update(d["id"] for d in new_deals)
+    # 🟠 Weekly LCC roundup — Sundays only, one message, top 5-7 (Tom 2026-07-08).
+    # Independent of the daily categories: LCC deals never appear in those.
+    send_weekly_lcc_roundup(all_deals, today_str)
+
+    # Update seen IDs — refresh last_seen for EVERY currently fetched deal
+    # (not just new ones), so still-live deals never age out and re-alert.
+    now_iso = datetime.now().isoformat()
+    for d in all_deals:
+        seen[d["id"]] = now_iso
     save_seen(seen)
 
     # Phase 1: write the public JSON snapshot the static HTML reads on mobile.

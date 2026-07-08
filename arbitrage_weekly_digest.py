@@ -83,22 +83,26 @@ def fetch_reddit():
     return deals
 
 # ── Evergreen award sweet spots ───────────────────────────────────────────────
+# UPDATED 2026-07-08 (Fable 5 audit, web-verified): several "evergreen" spots
+# died in 2024-2026 devaluations — Turkish 45K TATL (now 65K, 02/2024),
+# LifeMiles 63K (now 92.4K after 3 devals), United Excursionist (killed 08/2025).
+# Sources: onemileatatime.com, awardwallet.com, frequentmiler.com (2026-07-08).
 SWEET_SPOTS = [
-    "United→ANA biz JFK–TYO: *88K* miles one-way (transfer Chase/Bilt)",
-    "Turkish Miles&Smiles→United domestic US: *10K* | Star Alliance biz Europe→US: *45K*",
-    "Chase UR→Hyatt: book Park Hyatt cat 1–8, *3.5K–45K* pts (best cpp in points)",
-    "Flying Blue Promo Rewards (monthly): biz Europe↔US often *50–60K* — check 1st of month",
-    "LifeMiles biz Europe→US *63K*, no fuel surcharges (watch for 'buy miles' promos ~1.5¢)",
-    "Aeroplan→biz to Europe *60K* + stopover for 5K; great sweet-spot distance chart",
-    "Virgin→ANA RTW biz *125K* round-trip (one of the best premium redemptions alive)",
+    "Flying Blue Promo Rewards (monthly, 25% off): biz Europe↔US often <b>45K</b> — check 1st of month",
+    "Flying Blue saver TATL biz floor: <b>60K</b> OW (post-01/2025; ~€300 YQ each way)",
+    "AA partner chart (last fixed chart alive): Europe↔US biz <b>57.5K</b> (Finnair), US↔Japan biz <b>60K</b> (JAL)",
+    "Qatar Qsuites US↔DOH: <b>70K</b> Avios OW (Avios move freely BA↔IB↔QR↔AY)",
+    "Virgin→ANA: US–Japan biz <b>52.5–60K</b> / First <b>72.5K</b> (round-trip bookings only)",
+    "Aeroplan: no fuel surcharges + stopover za <b>5K</b>; TATL biz od <b>60-75K</b> (mírná devaluace 06/2026)",
+    "Chase UR→Hyatt: Park Hyatt cat 1–8, <b>3.5K–45K</b> pts (still best cpp in points)",
 ]
 
 # ── Rotating subscription hacks (1 per week, by ISO week) ──────────────────────
 SUB_HACKS = [
-    "Spotify Premium via SK/Slovakia pricing — *~€5.99* vs €10.99 (VPN + local payment)",
-    "YouTube Premium via Turkey/India — *~€2–3/mo* vs €12.99 (family plan even cheaper)",
-    "Adobe CC via India pricing — *~50–60% off* vs EU (regional billing arbitrage)",
-    "Netflix via Turkey/Pakistan tier — *~€3–4/mo* for Standard (price varies, re-check)",
+    "Spotify Premium via SK/Slovakia pricing — <b>~€5.99</b> vs €10.99 (VPN + local payment)",
+    "YouTube Premium via Turkey/India — <b>~€2–3/mo</b> vs €12.99 (family plan even cheaper)",
+    "Adobe CC via India pricing — <b>~50–60% off</b> vs EU (regional billing arbitrage)",
+    "Netflix via Turkey/Pakistan tier — <b>~€3–4/mo</b> for Standard (price varies, re-check)",
     "NordVPN/Surfshark — buy 2yr via Black Friday + stack cashback portal (~70% off)",
     "ChatGPT/Claude — annual vs monthly: ~2 months free; check edu/regional offers",
 ]
@@ -110,16 +114,22 @@ def weekly_pick(lst):
 ACTION_ITEMS = [
     "Check Flying Blue Promo Rewards (resets 1st of month) for biz EU↔US",
     "Scan for credit card welcome bonuses ≥75K before next big trip",
-    "Verify any INTL-EVENT / G28 travel dates → set award alerts on those routes",
+    # 2026-07-08: reworded — hard rule says no skate-career references in this
+    # PUBLIC repo (the old text named the events directly).
+    "Verify upcoming event/travel dates → set award alerts on those routes",
     "Re-run mistake-fare watch: ITA Matrix + Google Flights price-error patterns",
     "Review subscription stack — cancel/rotate anything not used this month",
 ]
 
+def esc(s):
+    """Escape dynamic text for Telegram HTML parse mode (2026-07-08 audit)."""
+    return html.escape(str(s or ""), quote=False)
+
 def send_telegram(text):
     if len(text) > 4096:
-        text = text[:4050] + "\n\n_…zkráceno_"
+        text = text[:4050] + "\n\n<i>… zkráceno</i>"
     payload = json.dumps({"chat_id": CHAT_ID, "text": text,
-                          "parse_mode": "Markdown", "disable_web_page_preview": True}).encode()
+                          "parse_mode": "HTML", "disable_web_page_preview": True}).encode()
     req = urllib.request.Request(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
                                  data=payload, headers={"Content-Type": "application/json"})
     try:
@@ -142,35 +152,36 @@ def main():
     scored.sort(key=lambda x: x[0], reverse=True)
     top = scored[:10]
 
-    L = [f"💰 *ARBITRAGE WEEKLY DIGEST* — {today}",
-         f"_Top-of-week scan: awardtravel · churning · flightdeals_", ""]
+    L = [f"💰 <b>ARBITRAGE WEEKLY DIGEST</b> — {esc(today)}",
+         f"<i>Top-of-week scan: awardtravel · churning · flightdeals</i>", ""]
 
     if top:
-        L.append(f"🔥 *BEST DEALS THIS WEEK* ({len(top)} of {len(scored)} relevant)")
+        L.append(f"🔥 <b>BEST DEALS THIS WEEK</b> ({len(top)} of {len(scored)} relevant)")
         for i, (s, tags, d) in enumerate(top, 1):
-            t = d["title"][:120]
-            tagstr = " ".join(tags[:3])
-            L.append(f"{i}. {t}\n   {tagstr} · _{d['source']}_ · [link]({d['url']})")
+            t = esc(d["title"][:120])
+            tagstr = esc(" ".join(tags[:3]))
+            url = html.escape(d.get("url", ""), quote=True)
+            L.append(f'{i}. {t}\n   {tagstr} · <i>{esc(d["source"])}</i> · <a href="{url}">link</a>')
         L.append("")
     else:
-        L.append("🔥 *BEST DEALS THIS WEEK*")
-        L.append("_No high-relevance hits scored this week (feeds quiet or rate-limited)._")
+        L.append("🔥 <b>BEST DEALS THIS WEEK</b>")
+        L.append("<i>No high-relevance hits scored this week (feeds quiet or rate-limited).</i>")
         L.append("")
 
-    L.append("🏆 *EVERGREEN AWARD SWEET SPOTS*")
+    L.append("🏆 <b>EVERGREEN AWARD SWEET SPOTS</b>")
     for sp in SWEET_SPOTS:
         L.append(f"• {sp}")
     L.append("")
 
-    L.append("📺 *SUBSCRIPTION HACK OF THE WEEK*")
+    L.append("📺 <b>SUBSCRIPTION HACK OF THE WEEK</b>")
     L.append(f"• {weekly_pick(SUB_HACKS)}")
     L.append("")
 
-    L.append("✅ *WEEKLY ACTION ITEMS*")
+    L.append("✅ <b>WEEKLY ACTION ITEMS</b>")
     for a in ACTION_ITEMS:
-        L.append(f"☐ {a}")
+        L.append(f"☐ {esc(a)}")
     L.append("")
-    L.append("_Stay predatory. — Arbitrage Life_")
+    L.append("<i>Stay predatory. — Arbitrage Life</i>")
 
     msg = "\n".join(L)
     print(msg)

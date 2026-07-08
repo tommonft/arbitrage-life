@@ -1,0 +1,51 @@
+name: Weekly Digest — Sunday retrospective
+
+# NEW 2026-07-08 (Fable 5 audit): arbitrage_weekly_digest.py existed since June
+# but had no schedule — the weekly digest never fired from GitHub Actions
+# (a Claude scheduled-task workaround was failing with a 401 Telegram token).
+# This workflow runs it every Sunday morning with the repo's own secrets.
+
+on:
+  schedule:
+    # Sunday 06:07 UTC = 08:07 Prague (CEST)
+    - cron: '7 6 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: weekly-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read   # digest only reads feeds + sends Telegram, commits nothing
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Run weekly digest
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: python3 arbitrage_weekly_digest.py
+
+      - name: Alert on failure (dead-man switch)
+        if: failure()
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+        run: |
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\": ${CHAT_ID}, \"text\": \"⚠️ Weekly Digest run FAILED — check GitHub Actions: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}" \
+            || true

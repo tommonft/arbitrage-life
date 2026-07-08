@@ -18,7 +18,7 @@
       "alert_below_avg_pct": 15,
       "priority": "high",
       "tags": ["competition", "tom-personal"],
-      "notes": "INTL-EVENT Pan-American competition. Need confirmation by 2026-09-01."
+      "notes": "Pan-American competition trip. Need confirmation by 2026-09-01."
     },
     "PRG_TYO_nov": {
       "label": "PRG → Tokyo · November 2026",
@@ -35,7 +35,7 @@
       "alert_below_avg_pct": 15,
       "priority": "high",
       "tags": ["competition", "tom-personal"],
-      "notes": "Tokyo legacy event. Asia Pacific season."
+      "notes": "Tokyo event trip. Asia Pacific season."
     }
   },
 
@@ -44,7 +44,7 @@
   },
 
   "cars": {
-    "_comment": "Car rental watches (Phase 2). Useful for goal 2028 / multi-week trips."
+    "_comment": "Car rental watches (Phase 2). Useful for multi-week trips."
   },
 
   "miles_redemption": {

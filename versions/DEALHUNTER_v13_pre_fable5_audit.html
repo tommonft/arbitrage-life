@@ -1492,19 +1492,6 @@
 
 <script>
 // ═══════════════════════════════════════════
-//  SECURITY HELPERS (2026-07-08, Fable 5 audit)
-//  RSS titles/urls are UNTRUSTED external input — they used to be interpolated
-//  raw into innerHTML (XSS surface). Every external field now goes through esc()
-//  for HTML context or escAttr() for attribute context.
-// ═══════════════════════════════════════════
-function esc(s) {
-    return String(s ?? '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-function escAttr(s) { return esc(s); }
-
-// ═══════════════════════════════════════════
 //  STATE
 // ═══════════════════════════════════════════
 let allDeals = [];
@@ -1709,9 +1696,6 @@ document.addEventListener('DOMContentLoaded', () => {
 //  BACKEND
 // ═══════════════════════════════════════════
 async function checkBackend() {
-    // Honest status (2026-07-08): on Vercel there is no Flask backend — the
-    // static JSON feed IS the data source. The old text claimed "showing demo
-    // data", which hasn't existed since 2026-06-11.
     try {
         const r = await fetch(API + '/api/status', { signal: AbortSignal.timeout(3000) });
         if (r.ok) {
@@ -1719,8 +1703,8 @@ async function checkBackend() {
             document.getElementById('backendStatus').textContent = 'Connected — live scanning active';
         }
     } catch {
-        document.getElementById('backendDot').textContent = '🟡';
-        document.getElementById('backendStatus').textContent = 'Static mode — data from GitHub Actions (latest_deals.json)';
+        document.getElementById('backendDot').textContent = '🔴';
+        document.getElementById('backendStatus').textContent = 'Not running — showing demo data';
     }
 }
 
@@ -1915,16 +1899,13 @@ function render() {
         grid.innerHTML = deals.map(cardHTML).join('');
     }
 
-    // Misprice banner — honest values only (no fake $/0%)
+    // Misprice banner
     const mis = deals.filter(d => d.tags && d.tags.some(t => t.includes('MISPRICE')));
     const banner = document.getElementById('mispriceAlert');
     if (mis.length > 0) {
-        const m = mis[0];
-        const parts = [m.route];
-        if (m.price > 0) parts.push(`${m.currency || ''}${m.price}`);
-        if (m.savings > 0) parts.push(`${m.savings}% under avg`);
         banner.classList.add('show');
-        document.getElementById('alertSub').textContent = parts.join(' — ');
+        document.getElementById('alertSub').textContent =
+            `${mis[0].route} — $${mis[0].price} · ${mis[0].savings}% under avg`;
         document.getElementById('alertCount').textContent = mis.length;
     } else {
         banner.classList.remove('show');
@@ -1970,19 +1951,12 @@ const EU_AIRPORTS = new Set([
     'KEF'
 ]);
 
-// 2026-07-08 (Fable 5 audit): removed 'SK' (SAS — SkyTeam member, one of Tom's
-// 16 preferred carriers!) and 'IB' (Iberia mainline) which were sitting in this
-// set despite their own comments saying "not LCC". With airline codes now
-// populated from Travelpayouts v3, they would have wrongly filtered SAS/Iberia
-// deals. Added QS (Smartwings), W4 (Wizz Malta), DS (easyJet Switzerland).
 const EU_LOWCOST_AIRLINES = new Set([
     'W6',   // Wizz Air
-    'W4',   // Wizz Air Malta
     'FR',   // Ryanair
     'RK',   // Ryanair UK
     'U2',   // easyJet
     'EC',   // easyJet Europe
-    'DS',   // easyJet Switzerland
     'VY',   // Vueling
     'EW',   // Eurowings
     'LS',   // Jet2
@@ -1996,9 +1970,12 @@ const EU_LOWCOST_AIRLINES = new Set([
     'OR',   // TUI fly
     'BY',   // TUI Airways
     'V7',   // Volotea
+    'SK',   // (not LCC — SAS, removed)
     'NT',   // Binter Canarias (regional LCC)
+    'IB',   // (IB is Iberia mainline — not LCC, but Iberia Express is I2)
     'I2',   // Iberia Express
-    'QS'    // Smartwings
+    'OB',   // BoA — not EU but sometimes
+    'PI'    // PetroAir / placeholder
 ]);
 
 const LCC_NAME_RE = /\b(wizz|ryanair|easyjet|vueling|eurowings|transavia|norwegian|jet ?2|pegasus|sun ?express|nouvelair|tui|volotea|binter|iberia express|smartwings)\b/i;
@@ -2008,20 +1985,12 @@ function isEuropeanLowCost(d) {
     // but RSS titles contain city names (not IATA codes), so the both-EU check
     // almost always failed → LCC deals leaked through. Now: ANY LCC-airline match
     // is enough. Ryanair/Wizz/EasyJet etc. are 99% intra-EU anyway.
-    // 2026-07-08 (Fable 5 audit): also read the airline IATA code embedded in
-    // Travelpayouts titles — "PRG → MIL — €32 RT (W6, 2026-09-14…)". The v2 API
-    // returned no airline at all, so 60 % of the feed was invisible to this
-    // filter; scanner now uses v3 which fills d.airline with the IATA code.
     if (!d || d.type !== 'flight') return false;
     const tagsJoined = (d.tags || []).join(' ').toUpperCase();
     const airline    = (d.airline || '').toUpperCase();
 
-    // airline code inside TP-style title: "(W6, 2026-…" or "(FR)"
-    const codeInRoute = ((d.route || '').match(/\(([A-Z0-9]{2})[,)]/) || [])[1] || '';
-
     return tagsJoined.includes('LCC')
         || EU_LOWCOST_AIRLINES.has(airline.split(/\s+/)[0])
-        || EU_LOWCOST_AIRLINES.has(codeInRoute)
         || LCC_NAME_RE.test(d.airline || '')
         || LCC_NAME_RE.test(d.route   || '');
 }
@@ -2102,23 +2071,10 @@ function ageBadge(d) {
     return `<span class="age-badge age-veryold" title="${Math.round(ageDays)} dní">⚠️ STALE ${Math.round(ageDays)}d</span>`;
 }
 
-// Honest price rendering (2026-07-08, Fable 5 audit — NO FAKE DATA rule):
-// previously the card hardcoded "$" (317 € deals displayed as dollars, missing
-// prices displayed as "$0") and always claimed "↓ 0% below avg".
-// Now: price shown only when known, with its real currency; savings only when > 0.
-function priceHTML(d) {
-    if (!d.price || d.price <= 0) return '—';
-    const perNight = d.currency === 'USD/night' ? '/night' : '';
-    let symbol = d.currency || '';
-    if (symbol === 'USD/night') symbol = '$';
-    return symbol ? `${esc(symbol)}${esc(d.price)}${perNight}` : `${esc(d.price)}${perNight}`;
-}
-
 function cardHTML(d, isBonus) {
     const bonus = isBonus || isBonusFlight(d);
     const cls = (d.score >= 9 ? 'fire' : d.score >= 6 ? 'hot' : 'good') + (bonus ? ' bonus-card' : '') + (d.dead ? ' card-dead' : '');
     const emoji = d.score >= 9 ? '🔥' : d.score >= 6 ? '⚡' : '💡';
-    const id = escAttr(d.id);
 
     const typeTag = d.type === 'hotel'
         ? '<span class="tag tag-hotel">🏨 Hotel</span>'
@@ -2133,59 +2089,53 @@ function cardHTML(d, isBonus) {
                  : t.includes('GOOD')     ? 'tag-good'
                  : t.includes('DUMP') || t.includes('HIDDEN') || t.includes('GREY') ? 'tag-grey'
                  : 'tag-new';
-        return `<span class="tag ${tc}">${esc(t)}</span>`;
+        return `<span class="tag ${tc}">${t}</span>`;
     }).join('');
 
     const grey = d.grey_zone
         ? `<div class="grey-warning">⚠️ Grey zone tactic — verify risk before booking</div>`
         : '';
 
-    // Meta line: only what we actually know — no orphaned " · " separators.
-    const metaParts = [d.airline, d.dates].filter(Boolean).map(esc);
-    const metaLine = metaParts.length ? metaParts.join(' · ') : '—';
-
-    // Savings: only render the claim when we have a real non-zero number.
-    const savingsLine = (d.savings && d.savings > 0)
-        ? `<div class="card-savings">↓ ${esc(d.savings)}% below avg</div>` : '';
+    const currency = d.currency === 'USD/night' ? '/night' : '';
 
     return `
-    <div class="deal-card ${cls}" id="deal-${id}" onclick="openDeal('${id}')">
+    <div class="deal-card ${cls}" id="deal-${d.id}" onclick="openDeal('${d.id}')">
         <div class="card-top">
             <div class="card-left">
-                <div class="card-route">${esc(d.route)}</div>
-                <div class="card-meta">${metaLine}</div>
+                <div class="card-route">${d.route}</div>
+                <div class="card-meta">${d.airline} · ${d.dates}</div>
             </div>
             <div class="card-right">
-                <div class="card-price">${priceHTML(d)}</div>
-                ${savingsLine}
+                <div class="card-price">$${d.price}${currency}</div>
+                <div class="card-savings">↓ ${d.savings}% below avg</div>
             </div>
         </div>
         <div class="card-tags">
             ${age}${deadBadge}${typeTag}${tags}
-            <span class="score-pill">${emoji} ${esc(d.score)}</span>
+            <span class="score-pill">${emoji} ${d.score}/10</span>
         </div>
         ${grey}
         <div class="card-footer">
             <div class="card-source">
-                via ${esc(d.source)}
+                via ${d.source}
                 ${sourceBadge(d.source, d)}
                 ${d.status === 'shortlist' ? '<span class="source-badge badge-shortlist">📌 Shortlist</span>' : ''}
             </div>
             <div class="card-actions">
-                ${d.url && d.url !== '#' ? `<button class="act-btn" style="background:rgba(61,139,255,0.1);border-color:rgba(61,139,255,0.3);color:#5599ff" onclick="event.stopPropagation();openUrl('${escAttr(d.url)}')" title="Původní příspěvek / zdroj">🔗 Post</button>` : ''}
-                ${d.booking_url ? `<button class="act-btn" style="background:#1a6b3c;border-color:#27ae60" onclick="event.stopPropagation();openUrl('${escAttr(d.booking_url)}')" title="Booking.com">Book 🏨</button>` : ''}
+                ${d.url && d.url !== '#' ? `<button class="act-btn" style="background:rgba(61,139,255,0.1);border-color:rgba(61,139,255,0.3);color:#5599ff" onclick="event.stopPropagation();openUrl('${d.url}')" title="Původní příspěvek / zdroj">🔗 Post</button>` : ''}
+                ${d.booking_url ? `<button class="act-btn" style="background:#1a6b3c;border-color:#27ae60" onclick="event.stopPropagation();openUrl('${d.booking_url}')" title="Booking.com">Book 🏨</button>` : ''}
                 <button class="act-btn send ${d.approved?'sent':''}"
-                        onclick="event.stopPropagation();sendAlert('${id}')"
-                        id="alert-${id}">
+                        onclick="event.stopPropagation();sendAlert('${d.id}')"
+                        id="alert-${d.id}">
                     ${d.approved ? '✅' : '🔔'}
                 </button>
                 <div class="action-menu-wrap">
-                    <button class="act-btn more-btn" onclick="event.stopPropagation();toggleActionMenu('${id}')" title="Akce">⋯</button>
-                    <div class="action-dropdown" id="menu-${id}">
-                        <div class="ad-item shortlist" onclick="event.stopPropagation();setDealStatus('${id}','shortlist','📌 Přidáno do Shortlistu')">📌 Přidat do Shortlistu</div>
-                        <div class="ad-item archive"   onclick="event.stopPropagation();setDealStatus('${id}','archived','📁 Přesunuto do Odložených')">📁 Odložit</div>
-                        <div class="ad-item restore"   onclick="event.stopPropagation();setDealStatus('${id}','active','↩️ Vráceno do aktivních')">↩️ Vrátit do aktivních</div>
-                        <div class="ad-item delete"    onclick="event.stopPropagation();setDealStatus('${id}','deleted','✕ Deal smazán')">✕ Smazat</div>
+                    <button class="act-btn more-btn" onclick="event.stopPropagation();toggleActionMenu('${d.id}')" title="Akce">⋯</button>
+                    <div class="action-dropdown" id="menu-${d.id}">
+                        <div class="ad-item shortlist" onclick="event.stopPropagation();setDealStatus('${d.id}','shortlist','📌 Přidáno do Shortlistu')">📌 Přidat do Shortlistu</div>
+                        <div class="ad-item archive"   onclick="event.stopPropagation();setDealStatus('${d.id}','archived','📁 Přesunuto do Odložených')">📁 Odložit</div>
+                        <div class="ad-item restore"   onclick="event.stopPropagation();setDealStatus('${d.id}','active','↩️ Vráceno do aktivních')">↩️ Vrátit do aktivních</div>
+                        <div class="ad-item delete"    onclick="event.stopPropagation();setDealStatus('${d.id}','deleted','✕ Deal smazán')">✕ Smazat</div>
                     </div>
                 </div>
             </div>

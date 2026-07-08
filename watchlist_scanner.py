@@ -8,9 +8,11 @@ Watchlists live in watchlist.json (Tom edits there).
 Price history accumulates in watchlist_prices.json (auto-managed).
 """
 
+import html
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.parse
 import urllib.error
@@ -78,17 +80,23 @@ def query_travelpayouts(origin: str, destination: str, depart: str, ret: str, cu
         return None, None, None
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
+# 2026-07-08 (Fable 5 audit): parse_mode Markdown → HTML + html.escape on
+# dynamic strings (same reasoning as arbitrage_scanner.py — legacy Markdown
+# breaks on "_"/")" and the message is silently lost).
+def esc(s):
+    return html.escape(str(s or ""), quote=False)
+
 def send_telegram(text: str):
     if not BOT_TOKEN or not CHAT_ID:
         print("  [WARN] BOT_TOKEN / CHAT_ID not set — skipping Telegram")
         return False
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     if len(text) > 4000:
-        text = text[:4000] + "\n\n_...zkráceno_"
+        text = text[:4000] + "\n\n<i>… zkráceno</i>"
     payload = json.dumps({
         "chat_id":    int(CHAT_ID),
         "text":       text,
-        "parse_mode": "Markdown",
+        "parse_mode": "HTML",
         "disable_web_page_preview": True,
     }).encode("utf-8")
     try:
@@ -166,6 +174,13 @@ def scan_watch(watch_id: str, watch: dict, prices: dict):
     print(f"  Origins: {origins} → Destinations: {dests}")
     print(f"  Depart window: {dep_win}, Return window: {ret_win}")
 
+    # Guard against malformed config (2026-07-08, Fable 5 audit):
+    # a missing/short window used to raise IndexError deep in the loop.
+    if len(dep_win) < 2 or len(ret_win) < 2 or not dests:
+        print(f"  [SKIP] Watch '{label}' has incomplete config "
+              f"(need depart_window[2], return_window[2], destination_codes)")
+        return
+
     best_overall = None   # (price, origin, dest, dep, ret, airline)
     queries = 0
 
@@ -175,6 +190,7 @@ def scan_watch(watch_id: str, watch: dict, prices: dict):
                 for ret in daterange(ret_win[0], ret_win[1]):
                     queries += 1
                     price, airline, found_at = query_travelpayouts(o, d, dep, ret, currency)
+                    time.sleep(0.25)   # stay well under TP's 300 req/min limit
                     if price is None:
                         continue
                     if best_overall is None or price < best_overall[0]:
@@ -213,18 +229,36 @@ def scan_watch(watch_id: str, watch: dict, prices: dict):
     if avg and price <= avg * (1 - alert_pct / 100.0):
         alerts.append(f"{alert_pct}% below 7-day avg ({currency} {avg:.0f})")
 
+    # ALERT DEDUP (2026-07-08, Fable 5 audit): the scanner runs 3× daily —
+    # once a price sat below the threshold it re-alerted every single run.
+    # Now we re-alert only if the price dropped ≥3 % below the last alerted
+    # price OR the last alert is older than 3 days (gentle reminder).
     if alerts:
+        last = prices[watch_id].get("last_alert") or {}
+        last_price = last.get("price")
+        last_date  = last.get("date", "")
+        three_days_ago = (datetime.now() - timedelta(days=3)).isoformat()
+        is_better  = last_price is None or price <= last_price * 0.97
+        is_stale   = last_date < three_days_ago
+        if not (is_better or is_stale):
+            print(f"  (alert suppressed — already alerted at {currency} {last_price} on {last_date[:16]})")
+            alerts = []
+
+    if alerts:
+        sky = (f"https://www.skyscanner.com/transport/flights/"
+               f"{o.lower()}/{d.lower()}/{dep.replace('-','')[2:]}/{ret.replace('-','')[2:]}/")
         msg = (
-            f"🎯🎯🎯 *WATCHLIST HIT* 🎯🎯🎯\n\n"
-            f"*{label}*\n\n"
-            f"*Route:* {o} → {d}\n"
-            f"*Dates:* {dep} → {ret}\n"
-            f"*Price:* {currency} {price}\n"
-            f"*Airline:* {airline}\n\n"
-            f"_Trigger: " + " · ".join(alerts) + "_\n\n"
-            f"[Search Skyscanner](https://www.skyscanner.com/transport/flights/{o.lower()}/{d.lower()}/{dep.replace('-','')[2:]}/{ret.replace('-','')[2:]}/)"
+            f"🎯🎯🎯 <b>WATCHLIST HIT</b> 🎯🎯🎯\n\n"
+            f"<b>{esc(label)}</b>\n\n"
+            f"<b>Route:</b> {esc(o)} → {esc(d)}\n"
+            f"<b>Dates:</b> {esc(dep)} → {esc(ret)}\n"
+            f"<b>Price:</b> {esc(currency)} {price}\n"
+            f"<b>Airline:</b> {esc(airline)}\n\n"
+            f"<i>Trigger: " + esc(" · ".join(alerts)) + "</i>\n\n"
+            f'<a href="{html.escape(sky, quote=True)}">Search Skyscanner</a>'
         )
         send_telegram(msg)
+        prices[watch_id]["last_alert"] = {"date": datetime.now().isoformat(), "price": price}
         print(f"  🎯 ALERT sent: {' · '.join(alerts)}")
     else:
         print(f"  (no alert — price OK; avg {avg if avg else 'n/a'})")

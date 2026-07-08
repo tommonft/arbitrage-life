@@ -63,6 +63,17 @@ else
     echo "3/5 ▸ No stashed edits to restore — skipping"
 fi
 
+# Step 3.5 — PROTECT GENERATED DATA (added 2026-07-08, Fable 5 audit)
+# latest_deals.json / seen_deals.json / watchlist_prices.json are produced by
+# GitHub Actions in the cloud. Local copies on this Mac can be stale or
+# degraded (the local backup scanner has no network access) — shipping them
+# once overwrote the live 500-deal feed with 6 deals. Never ship local
+# versions of these files; GitHub's are always the source of truth.
+echo ""
+echo "3.5/5 ▸ Protecting generated data files (kept from GitHub)..."
+git checkout HEAD -- latest_deals.json seen_deals.json watchlist_prices.json 2>/dev/null
+echo "      ✓ latest_deals.json / seen_deals.json / watchlist_prices.json restored from GitHub state"
+
 # Step 4 — stage + commit if there are changes
 echo ""
 echo "4/5 ▸ Staging + committing changes..."
