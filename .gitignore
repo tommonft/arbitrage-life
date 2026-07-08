@@ -14,3 +14,6 @@ __pycache__/
 .DS_Store
 scanner.log
 run_output.txt
+zaloha_pred_purge/
+*.bundle
+Purge_History.command
