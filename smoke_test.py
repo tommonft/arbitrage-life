@@ -244,9 +244,19 @@ check("no 'showing demo data' text", "showing demo data" not in html_src)
 check("SAS not in LCC set", "'SK',   // (not LCC" not in html_src and '"SK",' not in html_src)
 check("score pill without fake /10 scale", "${esc(d.score)}/10" not in html_src)
 
+# v15: sort + legend + tiered expiry (2026-07-08)
+check("sort control present", 'setSort(' in html_src and "activeSort" in html_src)
+check("price sort puts unknown prices last", "a.price > 0 ? a.price : Infinity" in html_src)
+check("tiered staleness fn present", "function isStale(" in html_src)
+check("TP 48h expiry rule", "48 * 3600e3" in html_src)
+check("mistake-fare 3-day expiry rule", "3 * 86400e3" in html_src)
+check("legend panel present", 'id="legendPanel"' in html_src)
+
 # versioning rule
 check("versions/ snapshot v13 exists (pre-audit state)",
       (Path(__file__).parent / "versions" / "DEALHUNTER_v13_pre_fable5_audit.html").exists())
+check("versions/ snapshot v15 exists (sort+legend+expiry)",
+      (Path(__file__).parent / "versions" / "DEALHUNTER_v15_sort_legend_expiry.html").exists())
 
 # ── 8. workflows — hardening present ─────────────────────────────────────────
 print("\n[8] GitHub workflows — hardening")
