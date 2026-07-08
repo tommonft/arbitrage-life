@@ -1,1 +1,38 @@
-{}
+{
+  "PRG_ASU_oct": {
+    "history": [
+      {
+        "date": "2026-07-08T04:33:06.283328",
+        "price": 1300,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-07",
+        "return": "2026-10-17",
+        "airline": "Lufthansa",
+        "via": "google_flights"
+      }
+    ],
+    "last_alert": {
+      "date": "2026-07-08T04:33:06.609284",
+      "price": 1300
+    }
+  },
+  "PRG_TYO_nov": {
+    "history": [
+      {
+        "date": "2026-07-08T04:34:46.717491",
+        "price": 845,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-17",
+        "return": "2026-11-27",
+        "airline": "Turkish Airlines",
+        "via": "google_flights"
+      }
+    ],
+    "last_alert": {
+      "date": "2026-07-08T04:34:47.094849",
+      "price": 845
+    }
+  }
+}
