@@ -208,6 +208,30 @@ except Exception as e:
 check("watchlist send_telegram uses HTML mode",
       '"parse_mode": "HTML"' in open(Path(__file__).parent / "watchlist_scanner.py").read())
 
+# SerpApi fallback (2026-07-08): parser + combo rotation, no network
+serp_fixture = {
+    "best_flights": [
+        {"price": 1450, "flights": [{"airline": "LATAM"}]},
+        {"price": 1390, "flights": [{"airline": "Air Europa"}]},
+    ],
+    "other_flights": [{"price": 1520, "flights": [{"airline": "Iberia"}]}],
+}
+p, a, s = ws.parse_serpapi(serp_fixture)
+check("serpapi: cheapest option picked", p == 1390 and a == "Air Europa")
+check("serpapi: source label", s == "google_flights")
+p2, a2, s2 = ws.parse_serpapi({"price_insights": {"lowest_price": 999}})
+check("serpapi: price_insights fallback", p2 == 999)
+check("serpapi: empty response → None", ws.parse_serpapi({})[0] is None)
+
+combos = ws._serpapi_combos(["PRG", "VIE"], ["ASU"],
+                            ["2026-10-01", "2026-10-07"], ["2026-10-17", "2026-10-23"])
+check("serpapi: combos use primary origin only", all(c[0] == "PRG" for c in combos))
+check("serpapi: 3x3 date grid per destination", len(combos) == 9)
+check("serpapi: rotation picks a valid combo", ws._serpapi_pick(combos) in combos)
+check("serpapi: budget cap defined", ws.SERPAPI_MAX_PER_WATCH == 1)
+check("workflow passes SERPAPI_KEY",
+      "SERPAPI_KEY" in (Path(__file__).parent / ".github" / "workflows" / "watchlist-scanner.yml").read_text())
+
 # ── 7. deal_hunter.html — static honesty & XSS checks ───────────────────────
 print("\n[7] deal_hunter.html — static checks")
 html_src = open(Path(__file__).parent / "deal_hunter.html", encoding="utf-8").read()

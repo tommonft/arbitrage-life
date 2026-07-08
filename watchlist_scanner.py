@@ -26,6 +26,7 @@ PRICES_FILE    = SCRIPT_DIR / "watchlist_prices.json"
 BOT_TOKEN   = os.environ.get("BOT_TOKEN", "")
 CHAT_ID     = os.environ.get("CHAT_ID", "")
 TP_TOKEN    = os.environ.get("TRAVELPAYOUTS_TOKEN", "")
+SERPAPI_KEY = os.environ.get("SERPAPI_KEY", "").strip()
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; Arbitrage-Life Watchlist Scanner)",
@@ -78,6 +79,88 @@ def query_travelpayouts(origin: str, destination: str, depart: str, ret: str, cu
     except Exception as e:
         print(f"  [ERROR] {origin}→{destination} {depart}/{ret}: {e}")
         return None, None, None
+
+# ── SerpApi Google Flights fallback (added 2026-07-08, Fable 5) ──────────────
+# WHY: Travelpayouts is a CACHE of prices other Aviasales users searched.
+# Thin routes (PRG→ASU) are searched by almost nobody → cache is empty →
+# 19 runs produced zero data. SerpApi asks Google Flights LIVE, where a price
+# always exists. Free tier = 250 searches/month; our budget below uses ~186.
+#
+# BUDGET STRATEGY (do not exceed free tier!):
+#   - SerpApi fires ONLY when Travelpayouts returned nothing for the watch
+#   - exactly 1 query per watch per run (2 watches × 3 runs/day × 31 d ≈ 186/mo)
+#   - the (destination, depart, return) combo ROTATES deterministically between
+#     runs, so over ~2 weeks the whole date window gets sampled
+SERPAPI_MAX_PER_WATCH = 1
+
+def _serpapi_combos(origins, dests, dep_win, ret_win):
+    """Representative combos: primary origin × each dest × 3×3 date grid."""
+    def edges(win):
+        s = datetime.fromisoformat(win[0]).date()
+        e = datetime.fromisoformat(win[1]).date()
+        mid = s + (e - s) / 2
+        return sorted({s.isoformat(), mid.isoformat(), e.isoformat()})
+    combos = []
+    for d in dests:
+        for dep in edges(dep_win):
+            for ret in edges(ret_win):
+                combos.append((origins[0], d, dep, ret))
+    return combos
+
+def _serpapi_pick(combos):
+    """Deterministic rotation: different combo each run (3 runs/day)."""
+    idx = (date.today().toordinal() * 3 + datetime.utcnow().hour // 8) % len(combos)
+    return combos[idx]
+
+def query_serpapi(origin: str, destination: str, depart: str, ret: str, currency: str = "EUR"):
+    """One LIVE Google Flights lookup via SerpApi.
+    Returns (price, airline, source_label) or (None, None, None)."""
+    if not SERPAPI_KEY:
+        return None, None, None
+    params = {
+        "engine":       "google_flights",
+        "departure_id": origin,
+        "arrival_id":   destination,
+        "outbound_date": depart,
+        "return_date":  ret,
+        "type":         "1",          # round trip
+        "currency":     currency.upper(),
+        "hl":           "en",
+        "api_key":      SERPAPI_KEY,
+    }
+    url = "https://serpapi.com/search.json?" + urllib.parse.urlencode(params)
+    try:
+        req = urllib.request.Request(url, headers=HEADERS)
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode())
+        return parse_serpapi(data)
+    except urllib.error.HTTPError as e:
+        print(f"  [SerpApi HTTP {e.code}] {origin}→{destination} {depart}/{ret}")
+        return None, None, None
+    except Exception as e:
+        print(f"  [SerpApi ERROR] {origin}→{destination}: {e}")
+        return None, None, None
+
+def parse_serpapi(data: dict):
+    """Extract the cheapest option from a SerpApi Google Flights response.
+    Separated from the network call so smoke tests can verify it offline."""
+    options = (data.get("best_flights") or []) + (data.get("other_flights") or [])
+    best = None
+    for opt in options:
+        p = opt.get("price")
+        if p is None:
+            continue
+        if best is None or p < best[0]:
+            legs = opt.get("flights") or [{}]
+            airline = legs[0].get("airline", "?")
+            best = (int(p), airline, "google_flights")
+    if best:
+        return best
+    # fallback: aggregate insight when option list is empty
+    lowest = (data.get("price_insights") or {}).get("lowest_price")
+    if lowest:
+        return int(lowest), "?", "google_flights"
+    return None, None, None
 
 # ── Telegram ──────────────────────────────────────────────────────────────────
 # 2026-07-08 (Fable 5 audit): parse_mode Markdown → HTML + html.escape on
@@ -198,12 +281,25 @@ def scan_watch(watch_id: str, watch: dict, prices: dict):
 
     print(f"  Queries sent: {queries}")
 
+    via = "travelpayouts"
+    if best_overall is None and SERPAPI_KEY:
+        # ── SerpApi fallback: TP cache is empty for this route (typical for
+        # thin routes like PRG→ASU). One LIVE Google Flights query per run,
+        # rotating through the date window. Budget note at top of file.
+        combo = _serpapi_pick(_serpapi_combos(origins, dests, dep_win, ret_win))
+        o, d, dep, ret = combo
+        print(f"  ↪ Travelpayouts empty → SerpApi live lookup: {o}→{d} {dep}/{ret}")
+        price, airline, src = query_serpapi(o, d, dep, ret, currency)
+        if price is not None:
+            best_overall = (price, o, d, dep, ret, airline)
+            via = "google_flights"
+
     if best_overall is None:
         print("  No prices returned (token missing or no data)")
         return
 
     price, o, d, dep, ret, airline = best_overall
-    print(f"  ✓ Best: {o}→{d} {dep}/{ret} = {currency} {price} ({airline})")
+    print(f"  ✓ Best: {o}→{d} {dep}/{ret} = {currency} {price} ({airline}) via {via}")
 
     # Update history
     if watch_id not in prices:
@@ -216,6 +312,7 @@ def scan_watch(watch_id: str, watch: dict, prices: dict):
         "depart": dep,
         "return": ret,
         "airline": airline,
+        "via":    via,     # "travelpayouts" (cache) vs "google_flights" (live)
     }
     prices[watch_id]["history"].append(entry)
     # Keep 90 most-recent entries
