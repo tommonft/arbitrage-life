@@ -246,9 +246,12 @@ check("restores generated files before commit",
 
 # ── 10. Public repo hygiene ──────────────────────────────────────────────────
 print("\n[10] Repo hygiene")
+# Forbidden strings built dynamically so THIS test file doesn't contain them
+# verbatim either (it lives in the public repo too).
+_FORBIDDEN = ["".join(p) for p in (("world", "skate"), ("la ", "2028"), ("olymp", "ic"))]
 wl = open(Path(__file__).parent / "watchlist.json").read().lower()
 check("no skate-career references in public watchlist.json",
-      "competition" not in wl and "goal 2028" not in wl and "olympic" not in wl)
+      not any(w in wl for w in _FORBIDDEN))
 check("no hardcoded bot token anywhere",
       "7754" not in src_scanner or True)  # tokens live only in GitHub Secrets
 for f in ("arbitrage_scanner.py", "watchlist_scanner.py", "arbitrage_weekly_digest.py"):

@@ -36,7 +36,7 @@ _Top-of-week scan: awardtravel · churning · flightdeals_
 ✅ *WEEKLY ACTION ITEMS*
 ☐ Check Flying Blue Promo Rewards (resets 1st of month) for biz EU↔US
 ☐ Scan for credit card welcome bonuses ≥75K before next big trip
-☐ Verify any INTL-EVENT / G28 travel dates → set award alerts on those routes
+☐ Verify upcoming event/travel dates → set award alerts on those routes
 ☐ Re-run mistake-fare watch: ITA Matrix + Google Flights price-error patterns
 ☐ Review subscription stack — cancel/rotate anything not used this month
 
