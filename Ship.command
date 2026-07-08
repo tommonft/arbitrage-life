@@ -79,21 +79,28 @@ echo ""
 echo "4/5 ▸ Staging + committing changes..."
 git add -A
 if git diff --staged --quiet; then
-    echo "      ✓ Nothing to ship — local state matches remote"
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-    echo "   No new changes detected. Already up to date."
-    echo "═══════════════════════════════════════════════════════════"
-    echo ""
-    echo "Press Enter to close..."
-    read
-    exit 0
+    # Fix 2026-07-08 (Fable 5): even with no NEW changes there may be older
+    # committed-but-unsent work waiting (e.g. a previous push failed on auth).
+    UNPUSHED=$(git rev-list --count origin/main..HEAD 2>/dev/null || echo 0)
+    if [ "$UNPUSHED" -gt 0 ]; then
+        echo "      ⚠ No new changes, but $UNPUSHED unsent commit(s) waiting — sending now..."
+    else
+        echo "      ✓ Nothing to ship — local state matches remote"
+        echo ""
+        echo "═══════════════════════════════════════════════════════════"
+        echo "   No new changes detected. Already up to date."
+        echo "═══════════════════════════════════════════════════════════"
+        echo ""
+        echo "Press Enter to close..."
+        read
+        exit 0
+    fi
+else
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
+    git commit -m "Update — $TIMESTAMP" > /dev/null
+    CHANGED=$(git diff --stat HEAD~1 HEAD | tail -1)
+    echo "      ✓ Committed: $CHANGED"
 fi
-
-TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
-git commit -m "Update — $TIMESTAMP" > /dev/null
-CHANGED=$(git diff --stat HEAD~1 HEAD | tail -1)
-echo "      ✓ Committed: $CHANGED"
 
 # Step 5 — push to GitHub
 echo ""
