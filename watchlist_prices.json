@@ -70,6 +70,16 @@
         "return": "2026-10-23",
         "airline": "Iberia",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-10T08:53:19.940260",
+        "price": 1269,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-04",
+        "return": "2026-10-20",
+        "airline": "Air France",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -147,6 +157,16 @@
         "depart": "2026-11-11",
         "return": "2026-12-03",
         "airline": "Qatar Airways",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-07-10T08:55:11.741589",
+        "price": 948,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-14",
+        "return": "2026-11-30",
+        "airline": "Turkish Airlines",
         "via": "google_flights"
       }
     ],
