@@ -90,6 +90,16 @@
         "return": "2026-10-23",
         "airline": "Iberia",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-10T22:43:53.207959",
+        "price": 1235,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-04",
+        "return": "2026-10-23",
+        "airline": "Iberia",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -187,6 +197,16 @@
         "depart": "2026-11-14",
         "return": "2026-12-03",
         "airline": "Scandinavian Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-07-10T22:45:41.617718",
+        "price": 1004,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-14",
+        "return": "2026-12-03",
+        "airline": "Korean Air",
         "via": "google_flights"
       }
     ],
