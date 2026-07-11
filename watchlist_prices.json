@@ -120,11 +120,21 @@
         "return": "2026-10-20",
         "airline": "Air Canada",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-11T22:32:59.633963",
+        "price": 1184,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-07",
+        "return": "2026-10-23",
+        "airline": "Lufthansa",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-07-11T14:41:26.189804",
-      "price": 1245
+      "date": "2026-07-11T22:33:00.256405",
+      "price": 1184
     }
   },
   "PRG_TYO_nov": {
@@ -246,6 +256,16 @@
         "route": "PRG→HND",
         "depart": "2026-11-17",
         "return": "2026-11-30",
+        "airline": "Qatar Airways",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-07-11T22:34:53.465155",
+        "price": 813,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-12-03",
         "airline": "Qatar Airways",
         "via": "google_flights"
       }
