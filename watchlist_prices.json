@@ -170,6 +170,16 @@
         "return": "2026-10-20",
         "airline": "Lufthansa",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-13T16:15:47.198327",
+        "price": 1235,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-04",
+        "return": "2026-10-23",
+        "airline": "Iberia",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -347,6 +357,16 @@
         "depart": "2026-11-14",
         "return": "2026-11-30",
         "airline": "STARLUX Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-07-13T16:17:40.848868",
+        "price": 980,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-14",
+        "return": "2026-12-03",
+        "airline": "Korean Air",
         "via": "google_flights"
       }
     ],
