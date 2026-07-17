@@ -290,6 +290,16 @@
         "return": "2026-10-17",
         "airline": "KLM",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-17T15:03:41.267259",
+        "price": 1064,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-07",
+        "return": "2026-10-20",
+        "airline": "KLM",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -586,6 +596,16 @@
         "route": "PRG→HND",
         "depart": "2026-11-17",
         "return": "2026-11-27",
+        "airline": "Scandinavian Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-07-17T15:05:42.558645",
+        "price": 870,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-11-30",
         "airline": "Scandinavian Airlines",
         "via": "google_flights"
       }
