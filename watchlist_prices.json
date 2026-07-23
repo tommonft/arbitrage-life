@@ -958,11 +958,21 @@
         "return": "2026-11-30",
         "airline": "Qatar Airways",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-23T22:43:15.562759",
+        "price": 803,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-12-03",
+        "airline": "Qatar Airways",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-07-20T22:43:29.488673",
-      "price": 863
+      "date": "2026-07-23T22:43:16.192530",
+      "price": 803
     }
   }
 }
