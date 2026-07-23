@@ -948,6 +948,16 @@
         "return": "2026-11-30",
         "airline": "Scandinavian Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-23T15:48:22.493007",
+        "price": 918,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-11-30",
+        "airline": "Qatar Airways",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
