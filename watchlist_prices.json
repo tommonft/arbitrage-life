@@ -1008,6 +1008,16 @@
         "return": "2026-11-27",
         "airline": "STARLUX Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-25T14:52:58.968887",
+        "price": 989,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-14",
+        "return": "2026-11-30",
+        "airline": "STARLUX Airlines",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
