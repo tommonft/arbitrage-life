@@ -998,6 +998,16 @@
         "return": "2026-12-03",
         "airline": "Qatar Airways",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-25T07:47:51.280586",
+        "price": 989,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-14",
+        "return": "2026-11-27",
+        "airline": "STARLUX Airlines",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
