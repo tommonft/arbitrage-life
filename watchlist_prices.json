@@ -1048,6 +1048,16 @@
         "return": "2026-11-30",
         "airline": "Asiana Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-26T14:55:42.970454",
+        "price": 919,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-17",
+        "return": "2026-11-30",
+        "airline": "Asiana Airlines",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
