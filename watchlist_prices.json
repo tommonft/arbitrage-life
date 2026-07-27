@@ -1068,6 +1068,16 @@
         "return": "2026-12-03",
         "airline": "Qatar Airways",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-27T09:03:03.275217",
+        "price": 1083,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-11",
+        "return": "2026-11-30",
+        "airline": "British Airways",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
