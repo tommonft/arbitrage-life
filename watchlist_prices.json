@@ -1178,6 +1178,16 @@
         "return": "2026-12-03",
         "airline": "Korean Air",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-29T08:14:36.436403",
+        "price": 985,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-11-30",
+        "airline": "Qatar Airways",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
