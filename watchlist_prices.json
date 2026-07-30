@@ -1218,6 +1218,16 @@
         "return": "2026-12-03",
         "airline": "Qatar Airways",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-07-30T08:01:37.502041",
+        "price": 862,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-11",
+        "return": "2026-11-30",
+        "airline": "Etihad",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
