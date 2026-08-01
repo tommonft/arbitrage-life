@@ -590,6 +590,16 @@
         "return": "2026-10-23",
         "airline": "KLM",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-08-01T07:53:15.196582",
+        "price": 1196,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-07",
+        "return": "2026-10-17",
+        "airline": "Air Canada",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -1326,6 +1336,16 @@
         "route": "PRG→NRT",
         "depart": "2026-11-14",
         "return": "2026-12-03",
+        "airline": "STARLUX Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-08-01T07:55:04.628165",
+        "price": 986,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-17",
+        "return": "2026-11-27",
         "airline": "STARLUX Airlines",
         "via": "google_flights"
       }
