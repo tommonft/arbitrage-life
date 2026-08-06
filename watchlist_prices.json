@@ -740,6 +740,16 @@
         "return": "2026-10-23",
         "airline": "KLM",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-08-06T08:08:10.860659",
+        "price": 1159,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-04",
+        "return": "2026-10-20",
+        "airline": "Air France",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -1627,6 +1637,16 @@
         "depart": "2026-11-11",
         "return": "2026-12-03",
         "airline": "Qatar Airways",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-08-06T08:09:55.445920",
+        "price": 997,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-14",
+        "return": "2026-11-30",
+        "airline": "STARLUX Airlines",
         "via": "google_flights"
       }
     ],
