@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-07T22:20:11.736182",
-        "price": 1235,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-07",
-        "return": "2026-10-23",
-        "airline": "KLM",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-08T06:26:15.443272",
         "price": 1360,
         "currency": "EUR",
@@ -900,6 +890,16 @@
         "return": "2026-10-23",
         "airline": "Brussels Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-07T23:48:11.263397",
+        "price": 1368,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-01",
+        "return": "2026-10-23",
+        "airline": "Brussels Airlines",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -909,16 +909,6 @@
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-07T22:22:12.413136",
-        "price": 851,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-12-03",
-        "airline": "Etihad",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-08T06:28:15.535331",
         "price": 958,
@@ -1801,6 +1791,16 @@
       },
       {
         "date": "2026-09-07T18:27:46.126426",
+        "price": 1027,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-11",
+        "return": "2026-12-03",
+        "airline": "Lufthansa",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-09-07T23:49:59.677894",
         "price": 1027,
         "currency": "EUR",
         "route": "PRG→HND",
