@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-13T22:26:31.296668",
-        "price": 1237,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-07",
-        "return": "2026-10-23",
-        "airline": "KLM",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-14T07:01:05.950042",
         "price": 1397,
         "currency": "EUR",
@@ -900,6 +890,16 @@
         "return": "2026-10-23",
         "airline": "Air France",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-13T23:37:17.336825",
+        "price": 1792,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-01",
+        "return": "2026-10-23",
+        "airline": "Air France",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -909,16 +909,6 @@
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-13T22:28:50.571229",
-        "price": 906,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-12-03",
-        "airline": "Etihad",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-14T07:03:10.012712",
         "price": 954,
@@ -1801,6 +1791,16 @@
       },
       {
         "date": "2026-09-13T17:06:44.970690",
+        "price": 970,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-11",
+        "return": "2026-12-03",
+        "airline": "Scandinavian Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-09-13T23:39:04.878162",
         "price": 970,
         "currency": "EUR",
         "route": "PRG→HND",
