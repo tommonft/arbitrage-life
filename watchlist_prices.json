@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-16T21:59:15.736468",
-        "price": 1201,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-07",
-        "return": "2026-10-23",
-        "airline": "Lufthansa",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-17T06:22:46.482534",
         "price": 1429,
         "currency": "EUR",
@@ -900,6 +890,16 @@
         "return": "2026-10-23",
         "airline": "Iberia",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-16T23:53:42.459098",
+        "price": 1344,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-01",
+        "return": "2026-10-23",
+        "airline": "Iberia",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -909,16 +909,6 @@
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-16T22:01:31.899139",
-        "price": 772,
-        "currency": "EUR",
-        "route": "PRG→HND",
-        "depart": "2026-11-17",
-        "return": "2026-12-03",
-        "airline": "Qatar Airways",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-17T06:25:04.105086",
         "price": 984,
@@ -1801,6 +1791,16 @@
       },
       {
         "date": "2026-09-16T17:48:33.822787",
+        "price": 859,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-11",
+        "return": "2026-12-03",
+        "airline": "Etihad",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-09-16T23:55:20.442215",
         "price": 859,
         "currency": "EUR",
         "route": "PRG→NRT",
