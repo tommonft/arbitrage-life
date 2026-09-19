@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-19T22:03:16.492197",
-        "price": 1095,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-07",
-        "return": "2026-10-23",
-        "airline": "Lufthansa",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-20T06:17:34.634461",
         "price": 1399,
         "currency": "EUR",
@@ -900,6 +890,16 @@
         "return": "2026-10-23",
         "airline": "Iberia",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-19T23:37:46.309334",
+        "price": 1990,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-01",
+        "return": "2026-10-23",
+        "airline": "Iberia",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -909,16 +909,6 @@
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-19T22:04:55.308669",
-        "price": 989,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-12-03",
-        "airline": "Qatar Airways",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-20T06:19:28.876263",
         "price": 948,
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-11",
         "return": "2026-12-03",
         "airline": "Scandinavian Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-09-19T23:39:30.427220",
+        "price": 1061,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-11",
+        "return": "2026-12-03",
+        "airline": "Lufthansa",
         "via": "google_flights"
       }
     ],
