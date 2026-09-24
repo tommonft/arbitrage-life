@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-24T06:26:15.486444",
-        "price": 1640,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-04",
-        "return": "2026-10-17",
-        "airline": "Air France",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-24T14:27:53.192825",
         "price": 1241,
         "currency": "EUR",
@@ -900,6 +890,16 @@
         "return": "2026-10-17",
         "airline": "Brussels Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-24T10:32:32.601627",
+        "price": 1750,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-07",
+        "return": "2026-10-20",
+        "airline": "KLM",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -909,16 +909,6 @@
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-24T06:28:04.348556",
-        "price": 910,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-14",
-        "return": "2026-11-27",
-        "airline": "STARLUX Airlines",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-24T14:29:56.796383",
         "price": 910,
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-17",
         "return": "2026-11-27",
         "airline": "Turkish Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-09-24T10:34:08.188782",
+        "price": 914,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-17",
+        "return": "2026-11-30",
+        "airline": "Asiana Airlines",
         "via": "google_flights"
       }
     ],
