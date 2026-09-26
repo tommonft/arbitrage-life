@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-26T06:20:26.196034",
-        "price": 1337,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-01",
-        "return": "2026-10-17",
-        "airline": "Iberia",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-26T14:29:24.447247",
         "price": 1163,
         "currency": "EUR",
@@ -900,6 +890,16 @@
         "return": "2026-10-17",
         "airline": "Lufthansa",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-26T10:19:16.777042",
+        "price": 2241,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-04",
+        "return": "2026-10-20",
+        "airline": "KLM",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
@@ -909,16 +909,6 @@
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-26T06:22:23.569709",
-        "price": 957,
-        "currency": "EUR",
-        "route": "PRG→HND",
-        "depart": "2026-11-11",
-        "return": "2026-11-27",
-        "airline": "Austrian",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-26T14:31:14.747137",
         "price": 1050,
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-14",
         "return": "2026-11-27",
         "airline": "Korean Air",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-09-26T10:21:06.188280",
+        "price": 939,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-14",
+        "return": "2026-11-30",
+        "airline": "Scandinavian Airlines",
         "via": "google_flights"
       }
     ],
