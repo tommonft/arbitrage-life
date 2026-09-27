@@ -2,16 +2,6 @@
   "PRG_ASU_oct": {
     "history": [
       {
-        "date": "2026-08-28T05:50:37.940811",
-        "price": 1253,
-        "currency": "EUR",
-        "route": "PRG→ASU",
-        "depart": "2026-10-07",
-        "return": "2026-10-17",
-        "airline": "Lufthansa",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-08-28T23:14:06.520775",
         "price": 1133,
         "currency": "EUR",
@@ -900,25 +890,25 @@
         "return": "2026-10-20",
         "airline": "Lufthansa",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-27T17:57:45.292022",
+        "price": 1552,
+        "currency": "EUR",
+        "route": "PRG→ASU",
+        "depart": "2026-10-07",
+        "return": "2026-10-23",
+        "airline": "Lufthansa",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-09-21T18:55:53.769523",
-      "price": 1485
+      "date": "2026-09-27T17:57:45.756986",
+      "price": 1552
     }
   },
   "PRG_TYO_nov": {
     "history": [
-      {
-        "date": "2026-08-28T05:52:17.168405",
-        "price": 1090,
-        "currency": "EUR",
-        "route": "PRG→HND",
-        "depart": "2026-11-17",
-        "return": "2026-11-27",
-        "airline": "Asiana Airlines",
-        "via": "google_flights"
-      },
       {
         "date": "2026-08-28T23:15:46.154669",
         "price": 921,
@@ -1808,11 +1798,21 @@
         "return": "2026-11-30",
         "airline": "Scandinavian Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-09-27T17:59:29.230004",
+        "price": 824,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-12-03",
+        "airline": "Turkish Airlines",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-09-27T10:51:12.157871",
-      "price": 879
+      "date": "2026-09-27T17:59:29.642205",
+      "price": 824
     }
   }
 }
