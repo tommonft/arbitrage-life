@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-09-04T10:00:58.598935",
-        "price": 1040,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-11",
-        "return": "2026-11-30",
-        "airline": "SWISS",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-09-04T17:10:34.529419",
         "price": 985,
         "currency": "EUR",
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-11",
         "return": "2026-11-27",
         "airline": "Korean Air",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-10-04T11:22:18.376604",
+        "price": 1108,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-11",
+        "return": "2026-11-30",
+        "airline": "Emirates",
         "via": "google_flights"
       }
     ],
