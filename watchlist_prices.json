@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-09-18T10:06:30.179462",
-        "price": 732,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-11-30",
-        "airline": "Etihad",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-09-18T17:18:24.932582",
         "price": 731,
         "currency": "EUR",
@@ -1808,11 +1798,21 @@
         "return": "2026-11-30",
         "airline": "STARLUX Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-10-18T17:00:53.955327",
+        "price": 837,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-17",
+        "return": "2026-12-03",
+        "airline": "Turkish Airlines",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-10-12T21:55:26.658761",
-      "price": 831
+      "date": "2026-10-18T17:00:54.609848",
+      "price": 837
     }
   }
 }
