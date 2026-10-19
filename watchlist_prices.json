@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-09-18T23:39:15.199015",
-        "price": 733,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-12-03",
-        "airline": "Etihad",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-09-19T09:47:39.731614",
         "price": 953,
         "currency": "EUR",
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-17",
         "return": "2026-12-03",
         "airline": "Turkish Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-10-19T11:20:19.180401",
+        "price": 797,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-11",
+        "return": "2026-11-30",
+        "airline": "Qatar Airways",
         "via": "google_flights"
       }
     ],
