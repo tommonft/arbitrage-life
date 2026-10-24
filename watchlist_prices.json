@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-09-24T10:34:08.188782",
-        "price": 914,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-11-30",
-        "airline": "Asiana Airlines",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-09-24T18:01:48.927290",
         "price": 778,
         "currency": "EUR",
@@ -1808,11 +1798,21 @@
         "return": "2026-11-30",
         "airline": "STARLUX Airlines",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-10-24T17:03:41.519803",
+        "price": 886,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-17",
+        "return": "2026-12-03",
+        "airline": "KLM",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-10-18T23:44:55.183921",
-      "price": 783
+      "date": "2026-10-24T17:03:41.888255",
+      "price": 886
     }
   }
 }
