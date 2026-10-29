@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-09-29T11:38:26.404003",
-        "price": 1098,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-14",
-        "return": "2026-11-30",
-        "airline": "British Airways",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-09-29T18:55:58.696549",
         "price": 978,
         "currency": "EUR",
@@ -1806,6 +1796,16 @@
         "route": "PRG→NRT",
         "depart": "2026-11-14",
         "return": "2026-11-30",
+        "airline": "STARLUX Airlines",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-10-29T19:19:03.923376",
+        "price": 951,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-14",
+        "return": "2026-12-03",
         "airline": "STARLUX Airlines",
         "via": "google_flights"
       }
