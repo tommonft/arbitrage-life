@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-10-02T18:46:06.032823",
-        "price": 1074,
-        "currency": "EUR",
-        "route": "PRG→HND",
-        "depart": "2026-11-14",
-        "return": "2026-12-03",
-        "airline": "Korean Air",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-10-03T00:48:36.651042",
         "price": 1019,
         "currency": "EUR",
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-14",
         "return": "2026-12-03",
         "airline": "Korean Air",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-11-02T01:05:29.470665",
+        "price": 1098,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-17",
+        "return": "2026-11-27",
+        "airline": "Air France",
         "via": "google_flights"
       }
     ],
