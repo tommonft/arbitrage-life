@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-10-04T17:54:16.100926",
-        "price": 961,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-11",
-        "return": "2026-12-03",
-        "airline": "China Airlines",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-10-05T00:15:02.260063",
         "price": 947,
         "currency": "EUR",
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-14",
         "return": "2026-11-27",
         "airline": "Qatar Airways",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-11-04T13:19:57.090643",
+        "price": 953,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-14",
+        "return": "2026-11-30",
+        "airline": "STARLUX Airlines",
         "via": "google_flights"
       }
     ],
