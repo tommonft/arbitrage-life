@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-10-06T19:10:10.382239",
-        "price": 844,
-        "currency": "EUR",
-        "route": "PRG→NRT",
-        "depart": "2026-11-17",
-        "return": "2026-12-03",
-        "airline": "KLM",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-10-07T01:05:22.683375",
         "price": 839,
         "currency": "EUR",
@@ -1808,11 +1798,21 @@
         "return": "2026-11-27",
         "airline": "Korean Air",
         "via": "google_flights"
+      },
+      {
+        "date": "2026-11-06T13:18:30.957661",
+        "price": 783,
+        "currency": "EUR",
+        "route": "PRG→HND",
+        "depart": "2026-11-11",
+        "return": "2026-11-30",
+        "airline": "Qatar Airways",
+        "via": "google_flights"
       }
     ],
     "last_alert": {
-      "date": "2026-11-03T13:03:47.604095",
-      "price": 845
+      "date": "2026-11-06T13:18:31.501015",
+      "price": 783
     }
   }
 }
