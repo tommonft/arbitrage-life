@@ -910,16 +910,6 @@
   "PRG_TYO_nov": {
     "history": [
       {
-        "date": "2026-10-09T12:09:45.850778",
-        "price": 928,
-        "currency": "EUR",
-        "route": "PRG→HND",
-        "depart": "2026-11-17",
-        "return": "2026-11-30",
-        "airline": "Asiana Airlines",
-        "via": "google_flights"
-      },
-      {
         "date": "2026-10-09T19:04:39.785417",
         "price": 782,
         "currency": "EUR",
@@ -1807,6 +1797,16 @@
         "depart": "2026-11-17",
         "return": "2026-12-03",
         "airline": "Qatar Airways",
+        "via": "google_flights"
+      },
+      {
+        "date": "2026-11-09T01:17:23.089227",
+        "price": 946,
+        "currency": "EUR",
+        "route": "PRG→NRT",
+        "depart": "2026-11-11",
+        "return": "2026-11-27",
+        "airline": "Korean Air",
         "via": "google_flights"
       }
     ],
